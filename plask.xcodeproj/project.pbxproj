@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		256AC3DA0F4B6AC300CF3369 /* plaskAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 256AC3D90F4B6AC300CF3369 /* plaskAppDelegate.mm */; };
+		5365DBC21948D24E00E91E90 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 5365DBC01948D24E00E91E90 /* nanovg.c */; };
+		5365DBC31948D24E00E91E90 /* stb_image.c in Sources */ = {isa = PBXBuildFile; fileRef = 5365DBC11948D24E00E91E90 /* stb_image.c */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.mm */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -58,6 +60,8 @@
 		29B97316FDCFA39411CA2CEA /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		5365DBC01948D24E00E91E90 /* nanovg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = nanovg.c; path = ../../libs/nanovg/src/nanovg.c; sourceTree = "<group>"; };
+		5365DBC11948D24E00E91E90 /* stb_image.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = stb_image.c; path = ../../libs/nanovg/src/stb_image.c; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* plask-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "plask-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Plask.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Plask.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C51CAD0D133AACE900FF807C /* Syphon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Syphon.framework; path = deps/Syphon.framework; sourceTree = "<group>"; };
@@ -177,6 +181,8 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				5365DBC01948D24E00E91E90 /* nanovg.c */,
+				5365DBC11948D24E00E91E90 /* stb_image.c */,
 				C5703539125003630082AA14 /* v8_utils.cc */,
 				C570353A125003630082AA14 /* v8_utils.h */,
 				C5703515124FFED40082AA14 /* plask_bindings.h */,
@@ -234,6 +240,8 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "plask" */;
 			compatibilityVersion = "Xcode 3.1";
 			developmentRegion = English;
@@ -289,8 +297,10 @@
 			files = (
 				8D11072D0486CEB800E47090 /* main.mm in Sources */,
 				256AC3DA0F4B6AC300CF3369 /* plaskAppDelegate.mm in Sources */,
+				5365DBC21948D24E00E91E90 /* nanovg.c in Sources */,
 				C5703517124FFED40082AA14 /* plask_bindings.mm in Sources */,
 				C570353B125003630082AA14 /* v8_utils.cc in Sources */,
+				5365DBC31948D24E00E91E90 /* stb_image.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,6 +392,7 @@
 					deps/v8/include,
 					deps/uv,
 					deps/node,
+					deps/nanovg,
 				);
 				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/deps/skiabuild/src/xcodebuild/Release\"";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -417,6 +428,7 @@
 					deps/v8/include,
 					deps/uv,
 					deps/node,
+					deps/nanovg,
 				);
 				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/deps/skiabuild/src/xcodebuild/Release\"";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
