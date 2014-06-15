@@ -7,7 +7,7 @@ plask.simpleWindow({
     type: '3d',  // Create an OpenGL window.
     vsync: true,  // Prevent tearing.
     // multisample: true,  // Anti-alias.
-    fullscreen: true
+    // fullscreen: true
   },
 
   init: function() {
@@ -62,7 +62,7 @@ plask.simpleWindow({
     nvg.stroke();
 
     nvg.resetTransform();
-    nvg.translate(Math.sin(this.framenum/100) * this.width/2 + this.width/2, 0);
+    nvg.translate(Math.sin(this.frametime) * this.width/2 + this.width/2, 0);
     nvg.beginPath();
     nvg.moveTo(0, 0);
     nvg.lineTo(0, this.height);
@@ -71,7 +71,7 @@ plask.simpleWindow({
 
     nvg.resetTransform();
     nvg.translate(this.width/2, this.height/2);
-    nvg.translate(Math.cos(this.framenum/100) * 400, Math.sin(this.framenum/100) * 400);
+    nvg.translate(Math.cos(this.frametime) * 400, Math.sin(this.frametime) * 400);
     nvg.beginPath();
     nvg.ellipse(0, 0, 50, 50);
     nvg.fillColor(1.0, 1.00, 1.0, 1.0);
