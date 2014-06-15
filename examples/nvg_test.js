@@ -44,7 +44,7 @@ plask.simpleWindow({
     gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     nvg.resetTransform();
-    nvg.beginFrame(this.width, this.height, 1, PlaskRawMac.NVG_STRAIGHT_ALPHA);
+    nvg.beginFrame(this.width, this.height, 1);
 
     nvg.translate(this.width/2, this.height/2);
     nvg.rotate(Math.sin(this.framenum/100));

@@ -7108,8 +7108,6 @@ public:
         static BatchedConstants constants[] = {
             { "NVG_STENCIL_STROKES", NVG_STENCIL_STROKES },
             { "NVG_ANTIALIAS", NVG_ANTIALIAS },
-            { "NVG_PREMULTIPLIED_ALPHA", NVG_PREMULTIPLIED_ALPHA },
-            { "NVG_STRAIGHT_ALPHA", NVG_STRAIGHT_ALPHA },
             { "NVG_ALIGN_LEFT", NVG_ALIGN_LEFT },
             { "NVG_ALIGN_CENTER", NVG_ALIGN_CENTER },
             { "NVG_ALIGN_RIGHT", NVG_ALIGN_RIGHT },
@@ -7245,8 +7243,7 @@ private:
         nvgBeginFrame(context,
                       args[0]->NumberValue(),
                       args[1]->NumberValue(),
-                      args[2]->NumberValue(),
-                      args[3]->NumberValue());
+                      args[2]->NumberValue());
         return v8::Undefined();
     }
     
