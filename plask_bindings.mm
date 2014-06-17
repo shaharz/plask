@@ -83,9 +83,12 @@ T Clamp(T v, T a, T b) {
 
 @interface WrappedNSWindow: NSWindow {
   v8::Persistent<v8::Function> event_callback_;
+  v8::Persistent<v8::Function> update_callback_;
+  NSTimer* animationTimer;
 }
 
 -(void)setEventCallbackWithHandle:(v8::Handle<v8::Function>)func;
+-(void)setFrameUpdateCallbackWithHandle:(v8::Handle<v8::Function>)func frameRate:(float)fps;
 
 @end
 
@@ -3957,6 +3960,8 @@ class NSWindowWrapper {
       { "setAcceptsFileDrag", &NSWindowWrapper::setAcceptsFileDrag },
       { "setEventCallback",
         &NSWindowWrapper::setEventCallback },
+    { "setFrameUpdateCallback",
+        &NSWindowWrapper::setFrameUpdateCallback },
       { "setTitle", &NSWindowWrapper::setTitle },
       { "setFrameTopLeftPoint", &NSWindowWrapper::setFrameTopLeftPoint },
       { "center", &NSWindowWrapper::center },
@@ -4205,6 +4210,15 @@ class NSWindowWrapper {
     [window setEventCallbackWithHandle:v8::Handle<v8::Function>::Cast(args[0])];
     return v8::Undefined();
   }
+
+    static v8::Handle<v8::Value> setFrameUpdateCallback(const v8::Arguments& args) {
+        if (args.Length() != 2 || !args[0]->IsFunction())
+            return v8_utils::ThrowError("Incorrect invocation of setFrameUpdateCallback.");
+        WrappedNSWindow* window = ExtractWindowPointer(args.Holder());
+        
+        [window setFrameUpdateCallbackWithHandle:v8::Handle<v8::Function>::Cast(args[0]) frameRate:args[1]->NumberValue()];
+        return v8::Undefined();
+    }
 
   static v8::Handle<v8::Value> setTitle(const v8::Arguments& args) {
     WrappedNSWindow* window = ExtractWindowPointer(args.Holder());
@@ -6916,6 +6930,36 @@ class NSAppleScriptWrapper {
 
 -(void)setEventCallbackWithHandle:(v8::Handle<v8::Function>)func {
   event_callback_ = v8::Persistent<v8::Function>::New(func);
+}
+
+-(void)setFrameUpdateCallbackWithHandle:(v8::Handle<v8::Function>)func frameRate:(float)fps {
+    if (animationTimer && [animationTimer isValid])
+    {
+        update_callback_.Dispose();
+        [animationTimer invalidate];
+    }
+    
+    animationTimer = [NSTimer timerWithTimeInterval:(1.0f / fps)
+                                              target:self
+                                            selector:@selector(timerFired:)
+                                            userInfo:nil
+                                             repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:animationTimer forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop currentRunLoop] addTimer:animationTimer forMode:NSEventTrackingRunLoopMode];
+
+    update_callback_ = v8::Persistent<v8::Function>::New(func);
+}
+
+- (void)timerFired:(NSTimer *)t
+{
+  if (*update_callback_) {
+      v8::TryCatch try_catch;
+      update_callback_->Call(v8::Context::GetCurrent()->Global(), 0, NULL);
+      // Hopefully plask.js will have caught any exceptions already.
+      if (try_catch.HasCaught()) {
+          printf("Exception in event callback, TODO(deanm): print something.\n");
+      }
+  }
 }
 
 -(void)processEvent:(NSEvent *)event {

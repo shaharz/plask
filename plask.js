@@ -299,7 +299,7 @@ exports.Window = function(width, height, opts) {
       opts.fullscreen === true,
       opts.highdpi === undefined ? 0 : opts.highdpi);
   var this_ = this;
-
+  this.nswindow = nswindow_;
   var dpi_scale = opts.highdpi === 2 ? 2 : 1;  // For scaling mouse events.
 
   this.context = nswindow_.context;  // Export the 3d context (if it exists).
@@ -633,16 +633,6 @@ exports.simpleWindow = function(obj) {
     obj.canvas = canvas;
   }
 
-  var framerate_handle = null;
-  obj.framerate = function(fps) {
-    if (framerate_handle !== null)
-      clearInterval(framerate_handle);
-    if (fps === 0) return;
-    framerate_handle = setInterval(function() {
-      obj.redraw();
-    }, 1000 / fps);
-  }
-
   // Export listener API so you can "this.on" instead of "this.window.on".
   obj.on = function(e, listener) {
     // TODO(deanm): Do this properly
@@ -663,17 +653,6 @@ exports.simpleWindow = function(obj) {
   this.getRelativeMouseState = function() {
     return window_.getRelativeMouseState();
   };
-
-  // Call init as early as possible, to give the init routine a chance to
-  // setup anything on the object it might want to do at runtime.
-  if ('init' in obj) {
-    try {
-      obj.init();
-    } catch (ex) {
-      sys.error('Exception caught in simpleWindow init:\n' +
-                ex + '\n' + ex.stack);
-    }
-  }
 
   var draw = null;
   var framenum = 0;
@@ -711,6 +690,21 @@ exports.simpleWindow = function(obj) {
     }
     window_.blit();  // Update the screen automatically.
   };
+
+  obj.framerate = function(fps) {
+    window_.nswindow.setFrameUpdateCallback(obj.redraw, fps);
+  };
+
+  // Call init as early as possible, to give the init routine a chance to
+  // setup anything on the object it might want to do at runtime.
+  if ('init' in obj) {
+    try {
+      obj.init();
+    } catch (ex) {
+      sys.error('Exception caught in simpleWindow init:\n' +
+                ex + '\n' + ex.stack);
+    }
+  }
 
   obj.redraw();  // Draw the first frame.
 
