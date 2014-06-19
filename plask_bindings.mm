@@ -7145,6 +7145,7 @@ public:
             { "strokeWidth", &NVGWrapper::strokeWidth },
             { "stroke", &NVGWrapper::stroke },
             { "fillColor", &NVGWrapper::fillColor },
+            { "fillColorHSL", &NVGWrapper::fillColorHSL },
             { "fill", &NVGWrapper::fill },
             { "miterLimit", &NVGWrapper::miterLimit },
             { "lineCap", &NVGWrapper::lineCap },
@@ -7176,6 +7177,13 @@ public:
             { "textBox", &NVGWrapper::textBox },
             { "textBounds", &NVGWrapper::textBounds },
             { "textBoxBounds", &NVGWrapper::textBoxBounds },
+            
+            // TODO: missing functions
+            // - image functions
+            // - scissor clip
+            // - proper NVGpaint (gradients, images)
+            // - proper NVGcolor (solid colors)
+            // - text metrics/glyph positions
         };
         
         for (size_t i = 0; i < arraysize(constants); ++i) {
@@ -7334,6 +7342,15 @@ private:
                                        args[1]->NumberValue(),
                                        args[2]->NumberValue(),
                                        args[3]->NumberValue()));
+        return v8::Undefined();
+    }
+
+    static v8::Handle<v8::Value> fillColorHSL(const v8::Arguments& args) {
+        NVGcontext* context = ExtractPointer(args.Holder());
+        nvgFillColor(context, nvgHSLA(args[0]->NumberValue(),
+                                      args[1]->NumberValue(),
+                                      args[2]->NumberValue(),
+                                      args[3]->NumberValue()));
         return v8::Undefined();
     }
     
