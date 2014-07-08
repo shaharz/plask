@@ -7232,7 +7232,7 @@ private:
 //        if (args.Length() == 2) {  // width / height offscreen constructor.
 //            unsigned int width = args[0]->Uint32Value();
 //            unsigned int height = args[1]->Uint32Value();
-            context = nvgCreateGL2(512, 512, NVG_ANTIALIAS);
+            context = nvgCreateGL2(NVG_ANTIALIAS);
 //        } else {
 //            return v8_utils::ThrowError("Improper NVG constructor arguments.");
 //        }
