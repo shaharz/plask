@@ -44,20 +44,21 @@
 #include <objc/runtime.h>
 
 #define SK_RELEASE 1  // Hmmmm, really? SkPreConfig is thinking we are debug.
-#include "skia/include/core/SkBitmap.h"
-#include "skia/include/core/SkCanvas.h"
-#include "skia/include/core/SkColorPriv.h"  // For color ordering.
-#include "skia/include/core/SkDevice.h"
-#include "skia/include/core/SkString.h"
-#include "skia/include/core/SkTypeface.h"
-#include "skia/include/core/SkUnPreMultiply.h"
-#include "skia/include/core/SkXfermode.h"
-#include "skia/include/utils/SkParsePath.h"
-#include "skia/include/effects/SkGradientShader.h"
-#include "skia/include/effects/SkDashPathEffect.h"
-#include "skia/include/pdf/SkPDFDevice.h"
-#include "skia/include/pdf/SkPDFDocument.h"
-#include "skia/include/ports/SkTypeface_mac.h"  // SkCreateTypefaceFromCTFont.
+#include "core/SkBitmap.h"
+#include "core/SkCanvas.h"
+#include "core/SkColorPriv.h"  // For color ordering.
+#include "core/SkDevice.h"
+#include "core/SkString.h"
+#include "core/SkTypeface.h"
+#include "core/SkUnPreMultiply.h"
+#include "core/SkXfermode.h"
+#include "utils/SkParsePath.h"
+#include "effects/SkGradientShader.h"
+#include "effects/SkDashPathEffect.h"
+#include "ports/SkTypeface_mac.h"  // SkCreateTypefaceFromCTFont.
+#include "gpu/GrContext.h"
+#include "gpu/skgpudevice.h"
+//#include "core/SkSurface.h"
 
 #import <Syphon/Syphon.h>
 
@@ -4084,14 +4085,7 @@ class NSWindowWrapper {
     NSOpenGLContext* context = NULL;
 
     if (type == 0) {  // 2d window.
-      bitmap = new SkBitmap;
-      bitmap->setConfig(SkBitmap::kARGB_8888_Config, width, height, width * 4);
-      bitmap->allocPixels();
-      bitmap->eraseARGB(0, 0, 0, 0);
-
-      BlitImageView* view = [[BlitImageView alloc] initWithSkBitmap:bitmap];
-      [window setContentView:view];
-      [view release];
+        v8_utils::ThrowError("Unimplemented");
     } else if (type == 1) {  // 3d window.
       NSOpenGLPixelFormatAttribute attrs[] = {
           NSOpenGLPFAColorSize, 24,
@@ -4753,7 +4747,7 @@ class SkPaintWrapper {
     static BatchedConstants constants[] = {
       // Flags.
       { "kAntiAliasFlag", SkPaint::kAntiAlias_Flag },
-      { "kFilterBitmapFlag", SkPaint::kFilterBitmap_Flag },
+//      { "kFilterBitmapFlag", SkPaint::kFilterBitmap_Flag },
       { "kDitherFlag", SkPaint::kDither_Flag },
       { "kUnderlineTextFlag", SkPaint::kUnderlineText_Flag },
       { "kStrikeThruTextFlag", SkPaint::kStrikeThruText_Flag },
@@ -4873,6 +4867,18 @@ class SkPaintWrapper {
   }
 
  private:
+    static void WeakCallback(v8::Persistent<v8::Value> value, void* data) {
+        v8::Handle<v8::Object> obj = v8::Handle<v8::Object>::Cast(value);
+        SkPaint* paint = ExtractPointer(obj);
+        
+        value.ClearWeak();
+        value.Dispose();
+        
+        // Delete the backing SkCanvas object.  Skia reference counting should
+        // handle cleaning up deeper resources (for example the backing pixels).
+        delete paint;
+    }
+    
   static v8::Handle<v8::Value> reset(const v8::Arguments& args) {
     SkPaint* paint = ExtractPointer(args.Holder());
     paint->reset();
@@ -5234,10 +5240,7 @@ class SkPaintWrapper {
     }
 
     SkPaint* paint = ExtractPointer(args.Holder());
-    paint->setPathEffect(new SkDashPathEffect(
-        intervals, length,
-        SkDoubleToScalar(args[1]->IsUndefined() ? 0.0 : args[1]->NumberValue()),
-        args[2]->BooleanValue()));
+      paint->setPathEffect(SkDashPathEffect::Create(intervals, length, SkDoubleToScalar(args[1]->IsUndefined() ? 0.0 : args[1]->NumberValue())));
     delete[] intervals;
     return v8::Undefined();
   }
@@ -5339,7 +5342,12 @@ class SkPaintWrapper {
       // hair-line implementation.  It is most familiar to default to 1.
       paint->setStrokeWidth(1);
     }
+    
     args.This()->SetInternalField(0, v8_utils::WrapCPointer(paint));
+      
+    v8::Persistent<v8::Object> persistent =
+    v8::Persistent<v8::Object>::New(args.This());
+    persistent.MakeWeak(NULL, &SkPaintWrapper::WeakCallback);
     return args.This();
   }
 };
@@ -5356,7 +5364,7 @@ class SkCanvasWrapper {
     ft_cache = v8::Persistent<v8::FunctionTemplate>::New(
         v8::FunctionTemplate::New(&SkCanvasWrapper::V8New));
     v8::Local<v8::ObjectTemplate> instance = ft_cache->InstanceTemplate();
-    instance->SetInternalFieldCount(1);  // SkCanvas pointers.
+    instance->SetInternalFieldCount(2);  // SkCanvas pointers.
 
     v8::Local<v8::Signature> default_signature = v8::Signature::New(ft_cache);
 
@@ -5394,7 +5402,6 @@ class SkCanvasWrapper {
       { "save", &SkCanvasWrapper::save },
       { "restore", &SkCanvasWrapper::restore },
       { "writeImage", &SkCanvasWrapper::writeImage },
-      { "writePDF", &SkCanvasWrapper::writePDF },
     };
 
     for (size_t i = 0; i < arraysize(constants); ++i) {
@@ -5451,20 +5458,7 @@ class SkCanvasWrapper {
     SkBitmap* bitmap = &tbitmap;
 
     SkCanvas* canvas;
-    if (args[0]->StrictEquals(v8::String::New("%PDF"))) {  // PDF constructor.
-      SkMatrix initial_matrix;
-      initial_matrix.reset();
-      SkISize page_size =
-          SkISize::Make(args[1]->Int32Value(), args[2]->Int32Value());
-      SkISize content_size =
-          SkISize::Make(args[3]->Int32Value(), args[4]->Int32Value());
-      SkPDFDevice* pdf_device = new SkPDFDevice(
-          page_size, content_size, initial_matrix);
-      canvas = new SkCanvas(pdf_device);
-      // Bit of a hack to get the width and height properties set.
-      tbitmap.setConfig(
-          SkBitmap::kNo_Config, pdf_device->width(), pdf_device->height());
-    } else if (args[0]->StrictEquals(v8::String::New("^IMG"))) {
+    if (args[0]->StrictEquals(v8::String::New("^IMG"))) {
       // Load an image, either a path to a file on disk, or a TypedArray or
       // other external array data backed JS object.
       // TODO(deanm): This is all super inefficent, we copy / flip / etc.
@@ -5525,11 +5519,12 @@ class SkCanvasWrapper {
       if (!FreeImage_PreMultiplyWithAlpha(fbitmap))
         return v8_utils::ThrowError("Couldn't premultiply image.");
 
-      tbitmap.setConfig(SkBitmap::kARGB_8888_Config,
-                       FreeImage_GetWidth(fbitmap),
-                       FreeImage_GetHeight(fbitmap),
-                       FreeImage_GetWidth(fbitmap) * 4);
-      tbitmap.allocPixels();
+        
+    tbitmap.allocPixels(SkImageInfo::Make(FreeImage_GetWidth(fbitmap),
+                                          FreeImage_GetHeight(fbitmap),
+//                                          FreeImage_GetWidth(fbitmap) * 4,
+                                          kRGBA_8888_SkColorType,
+                                          kPremul_SkAlphaType));
 
       // Despite taking red/blue/green masks, FreeImage_CovertToRawBits doesn't
       // actually use them and swizzle the color ordering.  We just require
@@ -5542,25 +5537,37 @@ class SkCanvasWrapper {
       FreeImage_Unload(fbitmap);
 
       canvas = new SkCanvas(tbitmap);
-    } else if (args.Length() == 2) {  // width / height offscreen constructor.
-      unsigned int width = args[0]->Uint32Value();
-      unsigned int height = args[1]->Uint32Value();
-      tbitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height, width * 4);
-      tbitmap.allocPixels();
-      tbitmap.eraseARGB(0, 0, 0, 0);
-      canvas = new SkCanvas(tbitmap);
+    } else if (args.Length() == 2) {  // width / height gpu constructor
+//      tbitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height, width * 4);
+//      tbitmap.allocPixels();
+//      tbitmap.eraseARGB(0, 0, 0, 0);
+//      canvas = new SkCanvas(tbitmap);
+        
+        GrContext* ctx = GrContext::Create(kOpenGL_GrBackend, 0);
+        GrBackendRenderTargetDesc desc;
+        desc.fWidth = args[0]->Uint32Value();
+        desc.fHeight = args[1]->Uint32Value();
+        desc.fConfig = kSkia8888_GrPixelConfig;
+        desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
+        desc.fSampleCnt = 0;
+        desc.fStencilBits = 8;
+        
+        GLint buffer;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
+        desc.fRenderTargetHandle = buffer;
+        
+        GrRenderTarget* fRenderTarget = ctx->wrapBackendRenderTarget(desc);
+        
+        ctx->setRenderTarget(fRenderTarget);
+        
+        SkAutoTUnref<SkBaseDevice> device(new SkGpuDevice(ctx, fRenderTarget));
+        canvas = new SkCanvas(device);
+        
+        args.This()->SetPointerInInternalField(1, ctx);
     } else if (args.Length() == 1 && NSWindowWrapper::HasInstance(args[0])) {
       bitmap = NSWindowWrapper::ExtractSkBitmapPointer(
           v8::Handle<v8::Object>::Cast(args[0]));
       canvas = new SkCanvas(*bitmap);
-    } else if (args.Length() == 1 && SkCanvasWrapper::HasInstance(args[0])) {
-      SkCanvas* pcanvas = ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
-      const SkBitmap& pbitmap = pcanvas->getDevice()->accessBitmap(false);
-      tbitmap = pbitmap;
-      // Allocate a new block of pixels with a copy from pbitmap.
-      pbitmap.copyTo(&tbitmap, pbitmap.config(), NULL);
-
-      canvas = new SkCanvas(tbitmap);
     } else {
       return v8_utils::ThrowError("Improper SkCanvas constructor arguments.");
     }
@@ -5599,7 +5606,8 @@ class SkCanvasWrapper {
                   SkDoubleToScalar(args[6]->NumberValue()),
                   SkDoubleToScalar(args[7]->NumberValue()),
                   SkDoubleToScalar(args[8]->NumberValue()));
-    return v8::Boolean::New(canvas->concat(matrix));
+      canvas->concat(matrix);
+    return v8::Undefined();
   }
 
   static v8::Handle<v8::Value> setMatrix(const v8::Arguments& args) {
@@ -5710,7 +5718,7 @@ class SkCanvasWrapper {
 
     SkCanvas* src_canvas = SkCanvasWrapper::ExtractPointer(
           v8::Handle<v8::Object>::Cast(args[1]));
-    SkDevice* src_device = src_canvas->getDevice();
+    auto src_device = src_canvas->getDevice();
 
     SkRect dst_rect = { SkDoubleToScalar(args[2]->NumberValue()),
                         SkDoubleToScalar(args[3]->NumberValue()),
@@ -5978,25 +5986,6 @@ class SkCanvasWrapper {
 
     return v8::Undefined();
   }
-
-  static v8::Handle<v8::Value> writePDF(const v8::Arguments& args) {
-    SkCanvas* canvas = ExtractPointer(args.Holder());
-
-    if (args.Length() != 1)
-      return v8_utils::ThrowError("Wrong number of arguments.");
-
-    v8::String::Utf8Value filename(args[0]);
-
-    SkFILEWStream stream(*filename);
-    SkPDFDocument document;
-    // You shouldn't be calling this with an SkDevice (bitmap) backed SkCanvas.
-    document.appendPage(reinterpret_cast<SkPDFDevice*>(canvas->getDevice()));
-
-    if (!document.emitPDF(&stream))
-      return v8_utils::ThrowError("Error writing PDF.");
-
-    return v8::Undefined();
-  }
 };
 
 class NSSoundWrapper {
@@ -6173,31 +6162,10 @@ v8::Handle<v8::Value> NSOpenGLContextWrapper::texImage2DSkCanvasB(
 
 v8::Handle<v8::Value> NSOpenGLContextWrapper::drawSkCanvas(
     const v8::Arguments& args) {
-  if (args.Length() != 1)
-    return v8_utils::ThrowError("Wrong number of arguments.");
-
-  if (!args[0]->IsObject() && !SkCanvasWrapper::HasInstance(args[0]))
-    return v8_utils::ThrowError("Expected image to be an SkCanvas instance.");
-
-  SkCanvas* canvas = SkCanvasWrapper::ExtractPointer(
-      v8::Handle<v8::Object>::Cast(args[0]));
-  const SkBitmap& bitmap = canvas->getDevice()->accessBitmap(false);
-
-  GLfloat save_zoom_x, save_zoom_y;
-  glGetFloatv(GL_ZOOM_X, &save_zoom_x);
-  glGetFloatv(GL_ZOOM_Y, &save_zoom_y);
-  glRasterPos2i(-1, 1);
-  glPixelZoom(1, -1);
-  glDrawPixels(bitmap.width(),
-               bitmap.height(),
-               GL_BGRA,  // We have to swizzle, so this technically isn't ES.
-               GL_UNSIGNED_INT_8_8_8_8_REV,
-               bitmap.getPixels());
-  glPixelZoom(save_zoom_x, save_zoom_y);
-  // TODO(deanm): We should also restore the raster position, but it's not as
-  // simple since it goes through the transforms.  This should hopefully put us
-  // back to the default (0, 0, 0, 1) at least.
-  glRasterPos2i(-1, -1);
+    
+    GrContext* ctx = v8_utils::UnwrapCPointer<GrContext>(v8::Handle<v8::Object>::Cast(args[0])->GetInternalField(1));
+    ctx->flush();
+    
   return v8::Undefined();
 }
 
