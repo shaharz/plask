@@ -78,6 +78,7 @@
 		53230FFB196E057E00B8B7C4 /* bindings_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bindings_common.h; sourceTree = "<group>"; };
 		53230FFC196E078E00B8B7C4 /* midi_bindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = midi_bindings.h; sourceTree = "<group>"; };
 		53230FFD196E084400B8B7C4 /* nvg_bindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nvg_bindings.h; sourceTree = "<group>"; };
+		53230FFE196F21CB00B8B7C4 /* svgparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = svgparser.h; sourceTree = "<group>"; };
 		5365DBC01948D24E00E91E90 /* nanovg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = nanovg.c; path = ../../libs/nanovg/src/nanovg.c; sourceTree = "<group>"; };
 		538FF6DF19528F60004DFD85 /* libskia_core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_core.a; path = deps/skia/xcodebuild/Release/libskia_core.a; sourceTree = "<group>"; };
 		538FF6E019528F60004DFD85 /* libskia_opts.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_opts.a; path = deps/skia/xcodebuild/Release/libskia_opts.a; sourceTree = "<group>"; };
@@ -242,6 +243,7 @@
 				53230FFD196E084400B8B7C4 /* nvg_bindings.h */,
 				53230FFC196E078E00B8B7C4 /* midi_bindings.h */,
 				53230FF9196E049C00B8B7C4 /* gl_bindings.h */,
+				53230FFE196F21CB00B8B7C4 /* svgparser.h */,
 				256AC3F00F4B6AF500CF3369 /* plask_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.mm */,
 			);
@@ -423,6 +425,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -473,6 +477,7 @@
 					"$(PROJECT_DIR)/deps/skia/xcodebuild/Release",
 					"$(PROJECT_DIR)/deps",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = Plask;
 			};
@@ -483,6 +488,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -530,6 +537,7 @@
 					"$(PROJECT_DIR)/deps/skia/xcodebuild/Release",
 					"$(PROJECT_DIR)/deps",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = Plask;
 			};

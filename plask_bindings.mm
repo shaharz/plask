@@ -63,6 +63,8 @@
 #include "midi_bindings.h"
 #include "nvg_bindings.h"
 
+#include "svgparser.h"
+
 template <typename T>
 T Clamp(T v, T a, T b) {
   if (v < a) return a;
@@ -691,6 +693,7 @@ class SkPathWrapper {
       { "offset", &SkPathWrapper::offset },
       { "getBounds", &SkPathWrapper::getBounds },
       { "toSVGString", &SkPathWrapper::toSVGString },
+      { "fromSVGString", &SkPathWrapper::fromSVGString },
     };
 
     for (size_t i = 0; i < arraysize(constants); ++i) {
@@ -867,6 +870,16 @@ class SkPathWrapper {
     SkParsePath::ToSVGString(*path, &str);
     return v8::String::New(str.c_str(), str.size());
   }
+    
+    static v8::Handle<v8::Value> fromSVGString(const v8::Arguments& args) {
+        SkPath* path = ExtractPointer(args.Holder());
+        try {
+            SvgParser::parsePath(*v8::String::Utf8Value(args[0]), path);
+        } catch (std::exception) {
+            return v8_utils::ThrowError("Parse error");
+        }
+        return v8::Undefined();
+    }
 
   static v8::Handle<v8::Value> V8New(const v8::Arguments& args) {
     if (!args.IsConstructCall())
