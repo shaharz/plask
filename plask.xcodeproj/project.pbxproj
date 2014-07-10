@@ -74,6 +74,10 @@
 		29B97316FDCFA39411CA2CEA /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		53230FF9196E049C00B8B7C4 /* gl_bindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gl_bindings.h; sourceTree = "<group>"; };
+		53230FFB196E057E00B8B7C4 /* bindings_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bindings_common.h; sourceTree = "<group>"; };
+		53230FFC196E078E00B8B7C4 /* midi_bindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = midi_bindings.h; sourceTree = "<group>"; };
+		53230FFD196E084400B8B7C4 /* nvg_bindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nvg_bindings.h; sourceTree = "<group>"; };
 		5365DBC01948D24E00E91E90 /* nanovg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = nanovg.c; path = ../../libs/nanovg/src/nanovg.c; sourceTree = "<group>"; };
 		538FF6DF19528F60004DFD85 /* libskia_core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_core.a; path = deps/skia/xcodebuild/Release/libskia_core.a; sourceTree = "<group>"; };
 		538FF6E019528F60004DFD85 /* libskia_opts.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_opts.a; path = deps/skia/xcodebuild/Release/libskia_opts.a; sourceTree = "<group>"; };
@@ -231,9 +235,13 @@
 				538FF7601952A0CE004DFD85 /* opts */,
 				5365DBC01948D24E00E91E90 /* nanovg.c */,
 				C5703539125003630082AA14 /* v8_utils.cc */,
+				53230FFB196E057E00B8B7C4 /* bindings_common.h */,
 				C570353A125003630082AA14 /* v8_utils.h */,
 				C5703515124FFED40082AA14 /* plask_bindings.h */,
 				C5703516124FFED40082AA14 /* plask_bindings.mm */,
+				53230FFD196E084400B8B7C4 /* nvg_bindings.h */,
+				53230FFC196E078E00B8B7C4 /* midi_bindings.h */,
+				53230FF9196E049C00B8B7C4 /* gl_bindings.h */,
 				256AC3F00F4B6AF500CF3369 /* plask_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.mm */,
 			);
