@@ -1071,6 +1071,10 @@ class SkPaintWrapper {
       { "kMediumFilterLevel", SkPaint::kMedium_FilterLevel },
       { "kLowFilterLevel", SkPaint::kLow_FilterLevel },
       { "kNoneFilterLevel", SkPaint::kNone_FilterLevel },
+      // Text align
+      { "kLeftAlign", SkPaint::kLeft_Align },
+      { "kCenterAlign", SkPaint::kCenter_Align },
+      { "kRightAlign", SkPaint::kRight_Align },
     };
 
     static BatchedMethods methods[] = {
@@ -1103,6 +1107,7 @@ class SkPaintWrapper {
       { "setColor", &SkPaintWrapper::setColor },
       { "setColorHSV", &SkPaintWrapper::setColorHSV },
       { "setTextSize", &SkPaintWrapper::setTextSize },
+      { "setTextAlign", &SkPaintWrapper::setTextAlign },
       { "setXfermodeMode", &SkPaintWrapper::setXfermodeMode },
       { "setFontFamily", &SkPaintWrapper::setFontFamily },
       { "setFontFamilyPostScript", &SkPaintWrapper::setFontFamilyPostScript },
@@ -1357,6 +1362,13 @@ class SkPaintWrapper {
     paint->setTextSize(SkDoubleToScalar(args[0]->NumberValue()));
     return v8::Undefined();
   }
+    
+    static v8::Handle<v8::Value> setTextAlign(const v8::Arguments& args) {
+        SkPaint* paint = ExtractPointer(args.Holder());
+        
+        paint->setTextAlign(static_cast<SkPaint::Align>(v8_utils::ToInt32(args[0])));
+        return v8::Undefined();
+    }
 
   static v8::Handle<v8::Value> setXfermodeMode(const v8::Arguments& args) {
     SkPaint* paint = ExtractPointer(args.Holder());
