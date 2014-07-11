@@ -917,7 +917,6 @@ class SkPaintWrapper {
     static BatchedConstants constants[] = {
       // Flags.
       { "kAntiAliasFlag", SkPaint::kAntiAlias_Flag },
-//      { "kFilterBitmapFlag", SkPaint::kFilterBitmap_Flag },
       { "kDitherFlag", SkPaint::kDither_Flag },
       { "kUnderlineTextFlag", SkPaint::kUnderlineText_Flag },
       { "kStrikeThruTextFlag", SkPaint::kStrikeThruText_Flag },
@@ -965,6 +964,11 @@ class SkPaintWrapper {
       { "kRoundJoin", SkPaint::kRound_Join },
       { "kBevelJoin", SkPaint::kBevel_Join },
       { "kDefaultJoin", SkPaint::kDefault_Join },
+      // Bitmap filter
+      { "kHighFilterLevel", SkPaint::kHigh_FilterLevel },
+      { "kMediumFilterLevel", SkPaint::kMedium_FilterLevel },
+      { "kLowFilterLevel", SkPaint::kLow_FilterLevel },
+      { "kNoneFilterLevel", SkPaint::kNone_FilterLevel },
     };
 
     static BatchedMethods methods[] = {
@@ -972,7 +976,7 @@ class SkPaintWrapper {
       { "getFlags", &SkPaintWrapper::getFlags },
       { "setFlags", &SkPaintWrapper::setFlags },
       { "setAntiAlias", &SkPaintWrapper::setAntiAlias },
-      { "setFilterBitmap", &SkPaintWrapper::setFilterBitmap },
+      { "setFilterLevel", &SkPaintWrapper::setFilterLevel },
       { "setDither", &SkPaintWrapper::setDither },
       { "setUnderlineText", &SkPaintWrapper::setUnderlineText },
       { "setStrikeThruText", &SkPaintWrapper::setStrikeThruText },
@@ -1072,9 +1076,9 @@ class SkPaintWrapper {
     return v8::Undefined();
   }
 
-  static v8::Handle<v8::Value> setFilterBitmap(const v8::Arguments& args) {
+  static v8::Handle<v8::Value> setFilterLevel(const v8::Arguments& args) {
     SkPaint* paint = ExtractPointer(args.Holder());
-    paint->setFilterBitmap(args[0]->BooleanValue());
+    paint->setFilterLevel(static_cast<SkPaint::FilterLevel>(v8_utils::ToInt32(args[0])));
     return v8::Undefined();
   }
 
