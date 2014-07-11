@@ -1945,7 +1945,7 @@ class SkCanvasWrapper {
                     SkDoubleToScalar(args[1]->NumberValue()),
                     SkDoubleToScalar(args[2]->NumberValue()),
                     SkDoubleToScalar(args[3]->NumberValue()) };
-    canvas->clipRect(rect);
+    canvas->clipRect(rect, SkRegion::kIntersect_Op, true);
     return v8::Undefined();
   }
 
