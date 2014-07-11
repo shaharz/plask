@@ -1755,11 +1755,10 @@ class SkCanvasWrapper {
     // to copy and create a new SkBitmap in the case it already exists (for
     // example for an NSWindow which has already has an SkBitmap).  This is
     // important since a copy of an SkBitmap will have a NULL pixel pointer.
-    SkBitmap tbitmap;
-    SkBitmap* bitmap = &tbitmap;
 
     SkCanvas* canvas;
     if (args[0]->StrictEquals(v8::String::New("^IMG"))) {
+        SkBitmap tbitmap;
       // Load an image, either a path to a file on disk, or a TypedArray or
       // other external array data backed JS object.
       // TODO(deanm): This is all super inefficent, we copy / flip / etc.
@@ -1875,27 +1874,23 @@ class SkCanvasWrapper {
         canvas = new SkCanvas(device);
         
         args.This()->SetPointerInInternalField(1, ctx);
-    } else if (args.Length() == 1 && NSWindowWrapper::HasInstance(args[0])) {
-      bitmap = NSWindowWrapper::ExtractSkBitmapPointer(
-          v8::Handle<v8::Object>::Cast(args[0]));
-      canvas = new SkCanvas(*bitmap);
     } else {
       return v8_utils::ThrowError("Improper SkCanvas constructor arguments.");
     }
 
     args.This()->SetPointerInInternalField(0, canvas);
-    // Direct pixel access via array[] indexing.
-    args.This()->SetIndexedPropertiesToPixelData(
-        reinterpret_cast<uint8_t*>(bitmap->getPixels()), bitmap->getSize());
-    args.This()->Set(v8::String::New("width"),
-                     v8::Integer::NewFromUnsigned(bitmap->width()));
-    args.This()->Set(v8::String::New("height"),
-                     v8::Integer::NewFromUnsigned(bitmap->height()));
+//    // Direct pixel access via array[] indexing.
+//    args.This()->SetIndexedPropertiesToPixelData(
+//        reinterpret_cast<uint8_t*>(bitmap->getPixels()), bitmap->getSize());
+//    args.This()->Set(v8::String::New("width"),
+//                     v8::Integer::NewFromUnsigned(bitmap->width()));
+//    args.This()->Set(v8::String::New("height"),
+//                     v8::Integer::NewFromUnsigned(bitmap->height()));
 
     // Notify the GC that we have a possibly large amount of data allocated
     // behind this object.  This is sometimes a bit of a lie, for example for
     // a PDF surface or an NSWindow surface.  Anyway, it's just a heuristic.
-    int size_bytes = bitmap->width() * bitmap->height() * 4;
+    int size_bytes = canvas->getDevice()->width() * canvas->getDevice()->height() * 4;
     v8::V8::AdjustAmountOfExternalAllocatedMemory(size_bytes);
 
     v8::Persistent<v8::Object> persistent =
