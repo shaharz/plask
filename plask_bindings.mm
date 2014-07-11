@@ -898,6 +898,108 @@ class SkPathWrapper {
 };
 
 
+class SkBitmapWrapper {
+public:
+    static v8::Persistent<v8::FunctionTemplate> GetTemplate() {
+        static v8::Persistent<v8::FunctionTemplate> ft_cache;
+        if (!ft_cache.IsEmpty())
+            return ft_cache;
+        
+        v8::HandleScope scope;
+        ft_cache = v8::Persistent<v8::FunctionTemplate>::New(
+                                                             v8::FunctionTemplate::New(&SkBitmapWrapper::V8New));
+        v8::Local<v8::ObjectTemplate> instance = ft_cache->InstanceTemplate();
+        instance->SetInternalFieldCount(1);  // SkBitmapWrapper pointer.
+        
+        v8::Local<v8::Signature> default_signature = v8::Signature::New(ft_cache);
+        
+        // Configure the template...
+        static BatchedConstants constants[] = {
+            // FillType.
+            { "kWindingFillType", SkPath::kWinding_FillType },
+            { "kEvenOddFillType", SkPath::kEvenOdd_FillType },
+            { "kInverseWindingFillType", SkPath::kInverseWinding_FillType },
+            { "kInverseEvenOddFillType", SkPath::kInverseEvenOdd_FillType },
+        };
+        
+        static BatchedMethods methods[] = {
+            { "width", &SkBitmapWrapper::width },
+            { "height", &SkBitmapWrapper::height },
+        };
+        
+        for (size_t i = 0; i < arraysize(constants); ++i) {
+            ft_cache->Set(v8::String::New(constants[i].name),
+                          v8::Uint32::New(constants[i].val), v8::ReadOnly);
+            instance->Set(v8::String::New(constants[i].name),
+                          v8::Uint32::New(constants[i].val), v8::ReadOnly);
+        }
+        
+        for (size_t i = 0; i < arraysize(methods); ++i) {
+            instance->Set(v8::String::New(methods[i].name),
+                          v8::FunctionTemplate::New(methods[i].func,
+                                                    v8::Handle<v8::Value>(),
+                                                    default_signature));
+        }
+        
+        return ft_cache;
+    }
+    
+    static SkBitmap* ExtractPointer(v8::Handle<v8::Object> obj) {
+        return v8_utils::UnwrapCPointer<SkBitmap>(obj->GetInternalField(0));
+    }
+    
+    static bool HasInstance(v8::Handle<v8::Value> value) {
+        return GetTemplate()->HasInstance(value);
+    }
+    
+private:
+    static void WeakCallback(v8::Persistent<v8::Value> value, void* data) {
+        v8::Handle<v8::Object> obj = v8::Handle<v8::Object>::Cast(value);
+        auto p = ExtractPointer(obj);
+        
+        v8::V8::AdjustAmountOfExternalAllocatedMemory(-p->getSize());
+        
+        value.ClearWeak();
+        value.Dispose();
+        
+        delete p;
+    }
+
+    static v8::Handle<v8::Value> width(const v8::Arguments& args) {
+        SkBitmap* bitmap = ExtractPointer(args.Holder());
+        return v8::Integer::New(bitmap->width());
+    }
+    
+    static v8::Handle<v8::Value> height(const v8::Arguments& args) {
+        SkBitmap* bitmap = ExtractPointer(args.Holder());
+        return v8::Integer::New(bitmap->height());
+    }
+    
+    static v8::Handle<v8::Value> V8New(const v8::Arguments& args) {
+        if (!args.IsConstructCall())
+            return v8_utils::ThrowTypeError(kMsgNonConstructCall);
+        
+        SkBitmap* bitmap = nullptr;
+        if (SkBitmapWrapper::HasInstance(args[0])) {
+            SkBitmap* prev = SkBitmapWrapper::ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
+            bitmap = new SkBitmap(*prev);
+        } else if (args[0]->IsString()) {
+            bitmap = new SkBitmap();
+            SkImageDecoder::DecodeFile(*v8::String::Utf8Value(args[0]), bitmap);
+        }
+        
+        args.This()->SetInternalField(0, v8_utils::WrapCPointer(bitmap));
+
+        v8::V8::AdjustAmountOfExternalAllocatedMemory(bitmap->getSize());
+        v8::Persistent<v8::Object> persistent =
+        v8::Persistent<v8::Object>::New(args.This());
+        persistent.MakeWeak(NULL, &SkBitmapWrapper::WeakCallback);
+        
+        return args.This();
+    }
+};
+
+
 class SkPaintWrapper {
  public:
   static v8::Persistent<v8::FunctionTemplate> GetTemplate() {
@@ -1012,7 +1114,8 @@ class SkPaintWrapper {
       { "measureText", &SkPaintWrapper::measureText },
       { "measureTextBounds", &SkPaintWrapper::measureTextBounds },
       { "getFontMetrics", &SkPaintWrapper::getFontMetrics },
-      { "getTextPath", &SkPaintWrapper::getTextPath }
+      { "getTextPath", &SkPaintWrapper::getTextPath },
+      { "setBitmapShader", &SkPaintWrapper::setBitmapShader }
     };
 
     for (size_t i = 0; i < arraysize(constants); ++i) {
@@ -1387,6 +1490,29 @@ class SkPaintWrapper {
 
     return v8::Undefined();
   }
+    
+    static v8::Handle<v8::Value> setBitmapShader(const v8::Arguments& args) {
+        if (args.Length() != 1)
+            return v8_utils::ThrowError("Wrong number of arguments.");
+        
+        SkPaint* paint = ExtractPointer(args.Holder());
+        
+        if (!SkBitmapWrapper::HasInstance(args[0]))
+            return v8_utils::ThrowError("Bad arguments.");
+        
+        SkBitmap* bitmap = SkBitmapWrapper::ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
+        
+        // TODO(deanm): Tile mode.
+        SkMatrix localM;
+        localM.setTranslate(-bitmap->width()/2, -bitmap->height()/2);
+//        localM.postScale(dstSize.fWidth / srcRectPtr->width(),
+//                         dstSize.fHeight / srcRectPtr->height());
+        SkShader* s = SkShader::CreateBitmapShader(*bitmap, SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localM);
+        paint->setShader(s);
+        SkSafeUnref(s);
+        
+        return v8::Undefined();
+    }
 
   static v8::Handle<v8::Value> clearShader(const v8::Arguments& args) {
     SkPaint* paint = ExtractPointer(args.Holder());
@@ -1557,6 +1683,7 @@ class SkCanvasWrapper {
       { "drawLine", &SkCanvasWrapper::drawLine },
       { "drawPaint", &SkCanvasWrapper::drawPaint },
       { "drawCanvas", &SkCanvasWrapper::drawCanvas },
+      { "drawBitmap", &SkCanvasWrapper::drawBitmap },
       { "drawColor", &SkCanvasWrapper::drawColor },
       { "eraseColor", &SkCanvasWrapper::eraseColor },
       { "clear", &SkCanvasWrapper::eraseColor },
@@ -1921,6 +2048,31 @@ class SkCanvasWrapper {
                            &src_rect, dst_rect, paint);
     return v8::Undefined();
   }
+    
+    static v8::Handle<v8::Value> drawBitmap(const v8::Arguments& args) {
+        if (args.Length() < 6)
+            return v8_utils::ThrowError("Wrong number of arguments.");
+        
+        if (!SkBitmapWrapper::HasInstance(args[1]))
+            return v8_utils::ThrowError("Bad arguments.");
+        
+        SkCanvas* canvas = ExtractPointer(args.Holder());
+        SkPaint* paint = NULL;
+        if (SkPaintWrapper::HasInstance(args[0])) {
+            paint = SkPaintWrapper::ExtractPointer(
+                                                   v8::Handle<v8::Object>::Cast(args[0]));
+        }
+        
+        SkBitmap* bitmap = SkBitmapWrapper::ExtractPointer(v8::Handle<v8::Object>::Cast(args[1]));
+        
+        SkRect dst_rect = { SkDoubleToScalar(args[2]->NumberValue()),
+            SkDoubleToScalar(args[3]->NumberValue()),
+            SkDoubleToScalar(args[4]->NumberValue()),
+            SkDoubleToScalar(args[5]->NumberValue()) };
+
+        canvas->drawBitmapRect(*bitmap, nullptr, dst_rect, paint);
+        return v8::Undefined();
+    }
 
   static v8::Handle<v8::Value> drawColor(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
@@ -2577,6 +2729,7 @@ void plask_setup_bindings(v8::Handle<v8::ObjectTemplate> obj) {
   obj->Set(v8::String::New("NSEvent"), NSEventWrapper::GetTemplate());
   obj->Set(v8::String::New("SkPath"), SkPathWrapper::GetTemplate());
   obj->Set(v8::String::New("SkPaint"), SkPaintWrapper::GetTemplate());
+  obj->Set(v8::String::New("SkBitmap"), SkBitmapWrapper::GetTemplate());
   obj->Set(v8::String::New("SkCanvas"), SkCanvasWrapper::GetTemplate());
   obj->Set(v8::String::New("NVG"), NVGWrapper::GetTemplate());
   obj->Set(v8::String::New("NSOpenGLContext"),
