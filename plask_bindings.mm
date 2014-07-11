@@ -1361,9 +1361,8 @@ class SkPaintWrapper {
   static v8::Handle<v8::Value> setXfermodeMode(const v8::Arguments& args) {
     SkPaint* paint = ExtractPointer(args.Holder());
 
-    // TODO(deanm): Memory management.
     paint->setXfermodeMode(
-          static_cast<SkXfermode::Mode>(v8_utils::ToInt32(args[0])));
+          static_cast<SkXfermode::Mode>(v8_utils::ToInt32(args[0])))->unref();
     return v8::Undefined();
   }
 
@@ -1374,7 +1373,7 @@ class SkPaintWrapper {
     SkPaint* paint = ExtractPointer(args.Holder());
     v8::String::Utf8Value family_name(args[0]);
     paint->setTypeface(SkTypeface::CreateFromName(
-        *family_name, static_cast<SkTypeface::Style>(args[1]->Uint32Value())));
+        *family_name, static_cast<SkTypeface::Style>(args[1]->Uint32Value())))->unref();
     return v8::Undefined();
   }
 
@@ -2599,6 +2598,7 @@ class NSAppleScriptWrapper {
 {
 //    uint64_t begin = mach_absolute_time();
   if (*update_callback_) {
+      // v8::HandleScope scope; // needed?
       v8::TryCatch try_catch;
       update_callback_->Call(v8::Context::GetCurrent()->Global(), 0, NULL);
       // Hopefully plask.js will have caught any exceptions already.
