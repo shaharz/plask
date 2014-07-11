@@ -8,3 +8,5 @@ xcuserdata/
 *.perspectivev3
 *.mode1v3
 *.mode2v3
+*.log
+*.xcactivitylog
