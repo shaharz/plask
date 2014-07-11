@@ -1678,6 +1678,7 @@ class SkCanvasWrapper {
 
     static BatchedMethods methods[] = {
       { "clipRect", &SkCanvasWrapper::clipRect },
+      { "clipCircle", &SkCanvasWrapper::clipCircle },
       { "clipPath", &SkCanvasWrapper::clipPath },
       { "drawCircle", &SkCanvasWrapper::drawCircle },
       { "drawLine", &SkCanvasWrapper::drawLine },
@@ -1949,6 +1950,19 @@ class SkCanvasWrapper {
     return v8::Undefined();
   }
 
+    static v8::Handle<v8::Value> clipCircle(const v8::Arguments& args) {
+        SkCanvas* canvas = ExtractPointer(args.Holder());
+        
+        auto x = SkDoubleToScalar(args[0]->NumberValue());
+        auto y = SkDoubleToScalar(args[1]->NumberValue());
+        auto r = SkDoubleToScalar(args[2]->NumberValue());
+
+        SkRRect rrect;
+        rrect.setOval(SkRect::MakeLTRB(x-r, y-r, x+r, y+r));
+        canvas->clipRRect(rrect, SkRegion::kIntersect_Op, true);
+        return v8::Undefined();
+    }
+    
   static v8::Handle<v8::Value> clipPath(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
 
