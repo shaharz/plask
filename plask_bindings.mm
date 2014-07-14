@@ -694,6 +694,7 @@ class SkPathWrapper {
       { "getBounds", &SkPathWrapper::getBounds },
       { "toSVGString", &SkPathWrapper::toSVGString },
       { "fromSVGString", &SkPathWrapper::fromSVGString },
+      { "contains", &SkPathWrapper::contains },
     };
 
     for (size_t i = 0; i < arraysize(constants); ++i) {
@@ -879,6 +880,12 @@ class SkPathWrapper {
             return v8_utils::ThrowError("Parse error");
         }
         return v8::Undefined();
+    }
+    
+    static v8::Handle<v8::Value> contains(const v8::Arguments& args) {
+        SkPath* path = ExtractPointer(args.Holder());
+        bool ret = path->contains(SkDoubleToScalar(args[0]->NumberValue()), SkDoubleToScalar(args[1]->NumberValue()));
+        return v8::Boolean::New(ret);
     }
 
   static v8::Handle<v8::Value> V8New(const v8::Arguments& args) {
