@@ -921,25 +921,25 @@ public:
         v8::Local<v8::Signature> default_signature = v8::Signature::New(ft_cache);
         
         // Configure the template...
-        static BatchedConstants constants[] = {
-            // FillType.
-            { "kWindingFillType", SkPath::kWinding_FillType },
-            { "kEvenOddFillType", SkPath::kEvenOdd_FillType },
-            { "kInverseWindingFillType", SkPath::kInverseWinding_FillType },
-            { "kInverseEvenOddFillType", SkPath::kInverseEvenOdd_FillType },
-        };
+//        static BatchedConstants constants[] = {
+//            // FillType.
+//            { "kWindingFillType", SkPath::kWinding_FillType },
+//            { "kEvenOddFillType", SkPath::kEvenOdd_FillType },
+//            { "kInverseWindingFillType", SkPath::kInverseWinding_FillType },
+//            { "kInverseEvenOddFillType", SkPath::kInverseEvenOdd_FillType },
+//        };
         
         static BatchedMethods methods[] = {
             { "width", &SkBitmapWrapper::width },
             { "height", &SkBitmapWrapper::height },
         };
         
-        for (size_t i = 0; i < arraysize(constants); ++i) {
-            ft_cache->Set(v8::String::New(constants[i].name),
-                          v8::Uint32::New(constants[i].val), v8::ReadOnly);
-            instance->Set(v8::String::New(constants[i].name),
-                          v8::Uint32::New(constants[i].val), v8::ReadOnly);
-        }
+//        for (size_t i = 0; i < arraysize(constants); ++i) {
+//            ft_cache->Set(v8::String::New(constants[i].name),
+//                          v8::Uint32::New(constants[i].val), v8::ReadOnly);
+//            instance->Set(v8::String::New(constants[i].name),
+//                          v8::Uint32::New(constants[i].val), v8::ReadOnly);
+//        }
         
         for (size_t i = 0; i < arraysize(methods); ++i) {
             instance->Set(v8::String::New(methods[i].name),
