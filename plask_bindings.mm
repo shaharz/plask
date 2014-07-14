@@ -55,7 +55,7 @@
 #include "ports/SkTypeface_mac.h"  // SkCreateTypefaceFromCTFont.
 #include "gpu/GrContext.h"
 #include "gpu/skgpudevice.h"
-//#include "core/SkSurface.h"
+#include "core/SkSurface.h"
 
 #import <Syphon/Syphon.h>
 
@@ -1754,10 +1754,10 @@ class SkCanvasWrapper {
  private:
   static void WeakCallback(v8::Persistent<v8::Value> value, void* data) {
     v8::Handle<v8::Object> obj = v8::Handle<v8::Object>::Cast(value);
-    SkCanvas* canvas = ExtractPointer(obj);
+    SkSurface* surface = reinterpret_cast<SkSurface*>(obj->GetPointerFromInternalField(1));
 
-    int size_bytes = canvas->getDevice()->width() *
-                     canvas->getDevice()->height() * 4;
+    int size_bytes = surface->width() *
+                     surface->height() * 4;
     v8::V8::AdjustAmountOfExternalAllocatedMemory(-size_bytes);
 
     value.ClearWeak();
@@ -1765,105 +1765,15 @@ class SkCanvasWrapper {
 
     // Delete the backing SkCanvas object.  Skia reference counting should
     // handle cleaning up deeper resources (for example the backing pixels).
-    delete canvas;
+    delete surface;
   }
 
   static v8::Handle<v8::Value> V8New(const v8::Arguments& args) {
     if (!args.IsConstructCall())
       return v8_utils::ThrowTypeError(kMsgNonConstructCall);
 
-    // We have a level of indirection (tbitmap vs bitmap) so that we don't need
-    // to copy and create a new SkBitmap in the case it already exists (for
-    // example for an NSWindow which has already has an SkBitmap).  This is
-    // important since a copy of an SkBitmap will have a NULL pixel pointer.
-
-    SkCanvas* canvas;
-    if (args[0]->StrictEquals(v8::String::New("^IMG"))) {
-        SkBitmap tbitmap;
-      // Load an image, either a path to a file on disk, or a TypedArray or
-      // other external array data backed JS object.
-      // TODO(deanm): This is all super inefficent, we copy / flip / etc.
-
-      FIBITMAP* fbitmap = NULL;
-
-      if (args[1]->IsString()) {  // Path on disk.
-        v8::String::Utf8Value filename(args[1]);
-
-        FREE_IMAGE_FORMAT format = FreeImage_GetFileType(*filename, 0);
-        // Some formats don't have a signature so we're supposed to guess from
-        // the extension.
-        if (format == FIF_UNKNOWN)
-          format = FreeImage_GetFIFFromFilename(*filename);
-
-        if (format == FIF_UNKNOWN || !FreeImage_FIFSupportsReading(format))
-          return v8_utils::ThrowError("Couldn't detect image type.");
-
-        fbitmap = FreeImage_Load(format, *filename, 0);
-        if (!fbitmap)
-          return v8_utils::ThrowError("Couldn't load image.");
-      } else if (args[1]->IsObject()) {
-        v8::Local<v8::Object> data = v8::Local<v8::Object>::Cast(args[1]);
-        if (!data->HasIndexedPropertiesInExternalArrayData())
-          return v8_utils::ThrowError("Data must be an ExternalArrayData.");
-        int element_size = v8_typed_array::SizeOfArrayElementForType(
-            data->GetIndexedPropertiesExternalArrayDataType());
-        // FreeImage's annoying Windows types...
-        DWORD size = data->GetIndexedPropertiesExternalArrayDataLength() *
-            element_size;
-        BYTE* datadata = reinterpret_cast<BYTE*>(
-            data->GetIndexedPropertiesExternalArrayData());
-
-        FIMEMORY* mem = FreeImage_OpenMemory(datadata, size);
-        FREE_IMAGE_FORMAT format = FreeImage_GetFileTypeFromMemory(mem, 0);
-        if (format == FIF_UNKNOWN || !FreeImage_FIFSupportsReading(format))
-          return v8_utils::ThrowError("Couldn't detect image type.");
-
-        fbitmap = FreeImage_LoadFromMemory(format, mem, 0);
-        FreeImage_CloseMemory(mem);
-        if (!fbitmap)
-          return v8_utils::ThrowError("Couldn't load image.");
-      } else {
-        return v8_utils::ThrowError("SkCanvas image not path or data.");
-      }
-
-      if (FreeImage_GetBPP(fbitmap) != 32) {
-        FIBITMAP* old_bitmap = fbitmap;
-        fbitmap = FreeImage_ConvertTo32Bits(old_bitmap);
-        FreeImage_Unload(old_bitmap);
-        if (!fbitmap)
-          return v8_utils::ThrowError("Couldn't convert image to 32-bit.");
-      }
-
-      // Skia works in premultplied alpha, so divide RGB by A.
-      // TODO(deanm): Should cache whether it used to have alpha before
-      // converting it to 32bpp which now has alpha.
-      if (!FreeImage_PreMultiplyWithAlpha(fbitmap))
-        return v8_utils::ThrowError("Couldn't premultiply image.");
-
-        
-    tbitmap.allocPixels(SkImageInfo::Make(FreeImage_GetWidth(fbitmap),
-                                          FreeImage_GetHeight(fbitmap),
-//                                          FreeImage_GetWidth(fbitmap) * 4,
-                                          kRGBA_8888_SkColorType,
-                                          kPremul_SkAlphaType));
-
-      // Despite taking red/blue/green masks, FreeImage_CovertToRawBits doesn't
-      // actually use them and swizzle the color ordering.  We just require
-      // that FreeImage and Skia are compiled with the same color ordering
-      // (BGRA).  The masks are ignored for 32 bpp bitmaps so we just pass 0.
-      // And of course FreeImage coordinates are upside down, so flip it.
-      FreeImage_ConvertToRawBits(reinterpret_cast<BYTE*>(tbitmap.getPixels()),
-                                 fbitmap, tbitmap.rowBytes(),
-                                 32, 0, 0, 0, TRUE);
-      FreeImage_Unload(fbitmap);
-
-      canvas = new SkCanvas(tbitmap);
-    } else if (args.Length() == 2) {  // width / height gpu constructor
-//      tbitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height, width * 4);
-//      tbitmap.allocPixels();
-//      tbitmap.eraseARGB(0, 0, 0, 0);
-//      canvas = new SkCanvas(tbitmap);
-        
+    SkSurface* surface;
+    if (args.Length() == 2) {  // width / height gpu constructor
         GrContext* ctx = GrContext::Create(kOpenGL_GrBackend, 0);
         GrBackendRenderTargetDesc desc;
         desc.fWidth = args[0]->Uint32Value();
@@ -1877,41 +1787,28 @@ class SkCanvasWrapper {
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
         desc.fRenderTargetHandle = buffer;
         
-        GrRenderTarget* fRenderTarget = ctx->wrapBackendRenderTarget(desc);
+        surface = SkSurface::NewRenderTargetDirect(ctx->wrapBackendRenderTarget(desc));
         
-        ctx->setRenderTarget(fRenderTarget);
-        
-// to create offscreen canvas:
-//        GrTextureDesc tdesc;
-//        tdesc.fFlags = kRenderTarget_GrTextureFlagBit ;
-//        //...set other desc fields.
-//        GrTexture* texture = ctx->createUncachedTexture(tdesc, NULL, 0);
-//        GLuint fboID = static_cast<GLuint>(texture->asRenderTarget()->getRenderTargetHandle());
-// or maybe:
-//        SkGpuDevice::Create(ctx, SkImageInfo::Make(int width, int height, SkColorType ct, SkAlphaType at), int sampleCount);
-        
-//        SkAutoTUnref<SkBaseDevice> device(new SkGpuDevice(ctx, fRenderTarget));
-        SkAutoTUnref<SkBaseDevice> device(SkGpuDevice::Create(fRenderTarget));
-        canvas = new SkCanvas(device);
-        
-        args.This()->SetPointerInInternalField(1, ctx);
+    } else if (args.Length() == 3) {
+        auto parentCanvas = ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
+        surface = SkSurface::NewScratchRenderTarget(parentCanvas->getGrContext(),
+                                                   SkImageInfo::Make(args[1]->Uint32Value(),
+                                                                     args[2]->Uint32Value(),
+                                                                     kRGBA_8888_SkColorType,
+                                                                     kPremul_SkAlphaType));
     } else {
       return v8_utils::ThrowError("Improper SkCanvas constructor arguments.");
     }
 
+    // TODO: get rid of canvas redudancy, store surface only (since the canvas is cached on the surface anyway)
+    SkCanvas* canvas = surface->getCanvas();
     args.This()->SetPointerInInternalField(0, canvas);
-//    // Direct pixel access via array[] indexing.
-//    args.This()->SetIndexedPropertiesToPixelData(
-//        reinterpret_cast<uint8_t*>(bitmap->getPixels()), bitmap->getSize());
-//    args.This()->Set(v8::String::New("width"),
-//                     v8::Integer::NewFromUnsigned(bitmap->width()));
-//    args.This()->Set(v8::String::New("height"),
-//                     v8::Integer::NewFromUnsigned(bitmap->height()));
+    args.This()->SetPointerInInternalField(1, surface);
 
     // Notify the GC that we have a possibly large amount of data allocated
     // behind this object.  This is sometimes a bit of a lie, for example for
     // a PDF surface or an NSWindow surface.  Anyway, it's just a heuristic.
-    int size_bytes = canvas->getDevice()->width() * canvas->getDevice()->height() * 4;
+    int size_bytes = surface->width() * surface->height() * 4;
     v8::V8::AdjustAmountOfExternalAllocatedMemory(size_bytes);
 
     v8::Persistent<v8::Object> persistent =
@@ -2410,8 +2307,8 @@ v8::Handle<v8::Value> NSOpenGLContextWrapper::texImage2DSkCanvasB(
 v8::Handle<v8::Value> NSOpenGLContextWrapper::drawSkCanvas(
     const v8::Arguments& args) {
     
-    GrContext* ctx = v8_utils::UnwrapCPointer<GrContext>(v8::Handle<v8::Object>::Cast(args[0])->GetInternalField(1));
-    ctx->flush();
+    SkCanvas* canvas = SkCanvasWrapper::ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
+    canvas->getGrContext()->flush();
     
   return v8::Undefined();
 }
