@@ -1,8 +1,8 @@
 #include "bindings_common.h"
-#include "nanovg.h"
+#include <src/nanovg.h>
 #define NANOVG_GL2_IMPLEMENTATION
-#include "nanovg_gl.h"
-#include "nanovg_gl_utils.h"
+#include <src/nanovg_gl.h>
+#include <src/nanovg_gl_utils.h>
 
 class NVGWrapper {
 public:
