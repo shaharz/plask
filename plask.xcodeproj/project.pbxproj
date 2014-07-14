@@ -49,6 +49,18 @@
 		C5DA222B168378CB00929928 /* libv8_base.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C5DA2223168378CB00929928 /* libv8_base.a */; };
 		C5DA222C168378CC00929928 /* libv8_snapshot.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C5DA2224168378CB00929928 /* libv8_snapshot.a */; };
 		C5EB3C6812FC55A60009FA7C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5EB3C6712FC55A60009FA7C /* CoreAudio.framework */; };
+		D7B75D2319747D0C00D4428F /* IpEndpointName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CAA19747D0C00D4428F /* IpEndpointName.cpp */; };
+		D7B75D2419747D0C00D4428F /* NetworkingUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CAF19747D0C00D4428F /* NetworkingUtils.cpp */; };
+		D7B75D2519747D0C00D4428F /* UdpSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CB019747D0C00D4428F /* UdpSocket.cpp */; };
+		D7B75D2819747D0C00D4428F /* OscOutboundPacketStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CBA19747D0C00D4428F /* OscOutboundPacketStream.cpp */; };
+		D7B75D2919747D0C00D4428F /* OscPrintReceivedElements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CBD19747D0C00D4428F /* OscPrintReceivedElements.cpp */; };
+		D7B75D2A19747D0C00D4428F /* OscReceivedElements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CBF19747D0C00D4428F /* OscReceivedElements.cpp */; };
+		D7B75D2B19747D0C00D4428F /* OscTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CC119747D0C00D4428F /* OscTypes.cpp */; };
+		D7B75D2C19747D0C00D4428F /* OscBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CC419747D0C00D4428F /* OscBundle.cpp */; };
+		D7B75D2D19747D0C00D4428F /* OscListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CC619747D0C00D4428F /* OscListener.cpp */; };
+		D7B75D2E19747D0C00D4428F /* OscMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CC819747D0C00D4428F /* OscMessage.cpp */; };
+		D7B75D2F19747D0C00D4428F /* OscSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75CCA19747D0C00D4428F /* OscSender.cpp */; };
+		D7B75D4819747D0C00D4428F /* TuioClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7B75D0C19747D0C00D4428F /* TuioClient.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -135,6 +147,41 @@
 		C5E26D161256442500EECE59 /* libskia_opts.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_opts.a; path = deps/skiabuild/src/xcodebuild/Release/libskia_opts.a; sourceTree = SOURCE_ROOT; };
 		C5E26D171256442500EECE59 /* libskia.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia.a; path = deps/skiabuild/src/xcodebuild/Release/libskia.a; sourceTree = SOURCE_ROOT; };
 		C5EB3C6712FC55A60009FA7C /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
+		D7B75CAA19747D0C00D4428F /* IpEndpointName.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IpEndpointName.cpp; sourceTree = "<group>"; };
+		D7B75CAB19747D0C00D4428F /* IpEndpointName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IpEndpointName.h; sourceTree = "<group>"; };
+		D7B75CAC19747D0C00D4428F /* NetworkingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkingUtils.h; sourceTree = "<group>"; };
+		D7B75CAD19747D0C00D4428F /* PacketListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketListener.h; sourceTree = "<group>"; };
+		D7B75CAF19747D0C00D4428F /* NetworkingUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NetworkingUtils.cpp; sourceTree = "<group>"; };
+		D7B75CB019747D0C00D4428F /* UdpSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UdpSocket.cpp; sourceTree = "<group>"; };
+		D7B75CB119747D0C00D4428F /* TimerListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TimerListener.h; sourceTree = "<group>"; };
+		D7B75CB219747D0C00D4428F /* UdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UdpSocket.h; sourceTree = "<group>"; };
+		D7B75CB719747D0C00D4428F /* MessageMappingOscPacketListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageMappingOscPacketListener.h; sourceTree = "<group>"; };
+		D7B75CB819747D0C00D4428F /* OscException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscException.h; sourceTree = "<group>"; };
+		D7B75CB919747D0C00D4428F /* OscHostEndianness.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscHostEndianness.h; sourceTree = "<group>"; };
+		D7B75CBA19747D0C00D4428F /* OscOutboundPacketStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscOutboundPacketStream.cpp; sourceTree = "<group>"; };
+		D7B75CBB19747D0C00D4428F /* OscOutboundPacketStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscOutboundPacketStream.h; sourceTree = "<group>"; };
+		D7B75CBC19747D0C00D4428F /* OscPacketListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscPacketListener.h; sourceTree = "<group>"; };
+		D7B75CBD19747D0C00D4428F /* OscPrintReceivedElements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscPrintReceivedElements.cpp; sourceTree = "<group>"; };
+		D7B75CBE19747D0C00D4428F /* OscPrintReceivedElements.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscPrintReceivedElements.h; sourceTree = "<group>"; };
+		D7B75CBF19747D0C00D4428F /* OscReceivedElements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscReceivedElements.cpp; sourceTree = "<group>"; };
+		D7B75CC019747D0C00D4428F /* OscReceivedElements.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscReceivedElements.h; sourceTree = "<group>"; };
+		D7B75CC119747D0C00D4428F /* OscTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscTypes.cpp; sourceTree = "<group>"; };
+		D7B75CC219747D0C00D4428F /* OscTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscTypes.h; sourceTree = "<group>"; };
+		D7B75CC319747D0C00D4428F /* OscArg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscArg.h; sourceTree = "<group>"; };
+		D7B75CC419747D0C00D4428F /* OscBundle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscBundle.cpp; sourceTree = "<group>"; };
+		D7B75CC519747D0C00D4428F /* OscBundle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscBundle.h; sourceTree = "<group>"; };
+		D7B75CC619747D0C00D4428F /* OscListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscListener.cpp; sourceTree = "<group>"; };
+		D7B75CC719747D0C00D4428F /* OscListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscListener.h; sourceTree = "<group>"; };
+		D7B75CC819747D0C00D4428F /* OscMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscMessage.cpp; sourceTree = "<group>"; };
+		D7B75CC919747D0C00D4428F /* OscMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscMessage.h; sourceTree = "<group>"; };
+		D7B75CCA19747D0C00D4428F /* OscSender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OscSender.cpp; sourceTree = "<group>"; };
+		D7B75CCB19747D0C00D4428F /* OscSender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscSender.h; sourceTree = "<group>"; };
+		D7B75CD019747D0C00D4428F /* TuioClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TuioClient.h; sourceTree = "<group>"; };
+		D7B75CD119747D0C00D4428F /* TuioCursor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TuioCursor.h; sourceTree = "<group>"; };
+		D7B75CD219747D0C00D4428F /* TuioObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TuioObject.h; sourceTree = "<group>"; };
+		D7B75CD319747D0C00D4428F /* TuioProfileBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TuioProfileBase.h; sourceTree = "<group>"; };
+		D7B75D0C19747D0C00D4428F /* TuioClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TuioClient.cpp; sourceTree = "<group>"; };
+		D7B75EE0197484D200D4428F /* tuio_binding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tuio_binding.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -236,6 +283,8 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				D7B75C7019747D0C00D4428F /* OSC */,
+				D7B75CCC19747D0C00D4428F /* TUIO */,
 				538FF7601952A0CE004DFD85 /* opts */,
 				5365DBC01948D24E00E91E90 /* nanovg.c */,
 				C5703539125003630082AA14 /* v8_utils.cc */,
@@ -243,6 +292,7 @@
 				C570353A125003630082AA14 /* v8_utils.h */,
 				C5703515124FFED40082AA14 /* plask_bindings.h */,
 				C5703516124FFED40082AA14 /* plask_bindings.mm */,
+				D7B75EE0197484D200D4428F /* tuio_binding.h */,
 				53230FFD196E084400B8B7C4 /* nvg_bindings.h */,
 				53230FFC196E078E00B8B7C4 /* midi_bindings.h */,
 				53230FF9196E049C00B8B7C4 /* gl_bindings.h */,
@@ -308,6 +358,102 @@
 				538FF75E1952A085004DFD85 /* SkXfermode_proccoeff.h */,
 			);
 			name = opts;
+			sourceTree = "<group>";
+		};
+		D7B75C7019747D0C00D4428F /* OSC */ = {
+			isa = PBXGroup;
+			children = (
+				D7B75CA819747D0C00D4428F /* src */,
+			);
+			path = OSC;
+			sourceTree = "<group>";
+		};
+		D7B75CA819747D0C00D4428F /* src */ = {
+			isa = PBXGroup;
+			children = (
+				D7B75CA919747D0C00D4428F /* ip */,
+				D7B75CB619747D0C00D4428F /* osc */,
+				D7B75CC319747D0C00D4428F /* OscArg.h */,
+				D7B75CC419747D0C00D4428F /* OscBundle.cpp */,
+				D7B75CC519747D0C00D4428F /* OscBundle.h */,
+				D7B75CC619747D0C00D4428F /* OscListener.cpp */,
+				D7B75CC719747D0C00D4428F /* OscListener.h */,
+				D7B75CC819747D0C00D4428F /* OscMessage.cpp */,
+				D7B75CC919747D0C00D4428F /* OscMessage.h */,
+				D7B75CCA19747D0C00D4428F /* OscSender.cpp */,
+				D7B75CCB19747D0C00D4428F /* OscSender.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		D7B75CA919747D0C00D4428F /* ip */ = {
+			isa = PBXGroup;
+			children = (
+				D7B75CAA19747D0C00D4428F /* IpEndpointName.cpp */,
+				D7B75CAB19747D0C00D4428F /* IpEndpointName.h */,
+				D7B75CAC19747D0C00D4428F /* NetworkingUtils.h */,
+				D7B75CAD19747D0C00D4428F /* PacketListener.h */,
+				D7B75CAE19747D0C00D4428F /* posix */,
+				D7B75CB119747D0C00D4428F /* TimerListener.h */,
+				D7B75CB219747D0C00D4428F /* UdpSocket.h */,
+			);
+			path = ip;
+			sourceTree = "<group>";
+		};
+		D7B75CAE19747D0C00D4428F /* posix */ = {
+			isa = PBXGroup;
+			children = (
+				D7B75CAF19747D0C00D4428F /* NetworkingUtils.cpp */,
+				D7B75CB019747D0C00D4428F /* UdpSocket.cpp */,
+			);
+			path = posix;
+			sourceTree = "<group>";
+		};
+		D7B75CB619747D0C00D4428F /* osc */ = {
+			isa = PBXGroup;
+			children = (
+				D7B75CB719747D0C00D4428F /* MessageMappingOscPacketListener.h */,
+				D7B75CB819747D0C00D4428F /* OscException.h */,
+				D7B75CB919747D0C00D4428F /* OscHostEndianness.h */,
+				D7B75CBA19747D0C00D4428F /* OscOutboundPacketStream.cpp */,
+				D7B75CBB19747D0C00D4428F /* OscOutboundPacketStream.h */,
+				D7B75CBC19747D0C00D4428F /* OscPacketListener.h */,
+				D7B75CBD19747D0C00D4428F /* OscPrintReceivedElements.cpp */,
+				D7B75CBE19747D0C00D4428F /* OscPrintReceivedElements.h */,
+				D7B75CBF19747D0C00D4428F /* OscReceivedElements.cpp */,
+				D7B75CC019747D0C00D4428F /* OscReceivedElements.h */,
+				D7B75CC119747D0C00D4428F /* OscTypes.cpp */,
+				D7B75CC219747D0C00D4428F /* OscTypes.h */,
+			);
+			path = osc;
+			sourceTree = "<group>";
+		};
+		D7B75CCC19747D0C00D4428F /* TUIO */ = {
+			isa = PBXGroup;
+			children = (
+				D7B75CCF19747D0C00D4428F /* include */,
+				D7B75D0B19747D0C00D4428F /* src */,
+			);
+			path = TUIO;
+			sourceTree = "<group>";
+		};
+		D7B75CCF19747D0C00D4428F /* include */ = {
+			isa = PBXGroup;
+			children = (
+				D7B75CD019747D0C00D4428F /* TuioClient.h */,
+				D7B75CD119747D0C00D4428F /* TuioCursor.h */,
+				D7B75CD219747D0C00D4428F /* TuioObject.h */,
+				D7B75CD319747D0C00D4428F /* TuioProfileBase.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		D7B75D0B19747D0C00D4428F /* src */ = {
+			isa = PBXGroup;
+			children = (
+				D7B75D0C19747D0C00D4428F /* TuioClient.cpp */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -394,21 +540,33 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072D0486CEB800E47090 /* main.mm in Sources */,
+				D7B75D2B19747D0C00D4428F /* OscTypes.cpp in Sources */,
+				D7B75D2F19747D0C00D4428F /* OscSender.cpp in Sources */,
+				D7B75D2C19747D0C00D4428F /* OscBundle.cpp in Sources */,
+				D7B75D2E19747D0C00D4428F /* OscMessage.cpp in Sources */,
+				D7B75D2419747D0C00D4428F /* NetworkingUtils.cpp in Sources */,
 				538FF7C11952A615004DFD85 /* SkUtils_opts_SSE2.cpp in Sources */,
+				D7B75D2819747D0C00D4428F /* OscOutboundPacketStream.cpp in Sources */,
 				538FF7C21952A615004DFD85 /* SkXfermode_opts_SSE2.cpp in Sources */,
 				53859AED1974D38000CC2944 /* SkCustomShader.cpp in Sources */,
 				538FF7831952A104004DFD85 /* opts_check_x86.cpp in Sources */,
+				D7B75D2D19747D0C00D4428F /* OscListener.cpp in Sources */,
 				256AC3DA0F4B6AC300CF3369 /* plaskAppDelegate.mm in Sources */,
 				538FF7BD1952A615004DFD85 /* SkBlitRect_opts_SSE2.cpp in Sources */,
+				D7B75D2919747D0C00D4428F /* OscPrintReceivedElements.cpp in Sources */,
+				D7B75D2519747D0C00D4428F /* UdpSocket.cpp in Sources */,
 				538FF7BB1952A615004DFD85 /* SkBitmapFilter_opts_SSE2.cpp in Sources */,
 				538FF7BE1952A615004DFD85 /* SkBlitRow_opts_SSE2.cpp in Sources */,
 				538FF7BC1952A615004DFD85 /* SkBitmapProcState_opts_SSE2.cpp in Sources */,
+				D7B75D2A19747D0C00D4428F /* OscReceivedElements.cpp in Sources */,
+				D7B75D4819747D0C00D4428F /* TuioClient.cpp in Sources */,
 				5365DBC21948D24E00E91E90 /* nanovg.c in Sources */,
 				538FF7BF1952A615004DFD85 /* SkBlurImage_opts_SSE2.cpp in Sources */,
 				538FF7C01952A615004DFD85 /* SkMorphology_opts_SSE2.cpp in Sources */,
 				538FF7C41952A62D004DFD85 /* SkBitmapProcState_opts_SSSE3.cpp in Sources */,
 				C5703517124FFED40082AA14 /* plask_bindings.mm in Sources */,
 				C570353B125003630082AA14 /* v8_utils.cc in Sources */,
+				D7B75D2319747D0C00D4428F /* IpEndpointName.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,6 +631,8 @@
 					deps/uv,
 					deps/node,
 					deps/nanovg,
+					deps/cinder/include,
+					/usr/local/include/,
 				);
 				INFOPLIST_FILE = "plask-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -481,9 +641,17 @@
 					"\"$(SRCROOT)/deps\"",
 					"$(PROJECT_DIR)/deps/skia/xcodebuild/Release",
 					"$(PROJECT_DIR)/deps",
+					"$(PROJECT_DIR)/deps/cinder/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-lssl",
+					"-lcrypto",
+					"-lz",
+					"-ldl",
+					"-lcinder_min",
+				);
 				PRODUCT_NAME = Plask;
 				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/deps/skia/src/gpu $(PROJECT_DIR)/deps/skia/src/gpu/gl $(PROJECT_DIR)/deps/skia/include/gpu $(PROJECT_DIR)/deps/skia/src/core";
 			};
@@ -533,6 +701,8 @@
 					deps/uv,
 					deps/node,
 					deps/nanovg,
+					deps/cinder/include,
+					/usr/local/include/,
 				);
 				INFOPLIST_FILE = "plask-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -541,9 +711,17 @@
 					"\"$(SRCROOT)/deps\"",
 					"$(PROJECT_DIR)/deps/skia/xcodebuild/Release",
 					"$(PROJECT_DIR)/deps",
+					"$(PROJECT_DIR)/deps/cinder/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-lssl",
+					"-lcrypto",
+					"-lz",
+					"-ldl",
+					"-lcinder_min",
+				);
 				PRODUCT_NAME = Plask;
 				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/deps/skia/src/gpu $(PROJECT_DIR)/deps/skia/src/gpu/gl $(PROJECT_DIR)/deps/skia/include/gpu $(PROJECT_DIR)/deps/skia/src/core";
 			};
