@@ -990,6 +990,16 @@ private:
         if (SkBitmapWrapper::HasInstance(args[0])) {
             SkBitmap* prev = SkBitmapWrapper::ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
             bitmap = new SkBitmap(*prev);
+        } else if (args[0]->IsObject()
+                   && v8::Local<v8::Object>::Cast(args[0])->HasIndexedPropertiesInExternalArrayData())
+        {
+            v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(args[0]);
+            int element_size = v8_typed_array::SizeOfArrayElementForType(obj->GetIndexedPropertiesExternalArrayDataType());
+            int size = obj->GetIndexedPropertiesExternalArrayDataLength() * element_size;
+            void* data = obj->GetIndexedPropertiesExternalArrayData();
+            bitmap = new SkBitmap();
+            SkImageDecoder::DecodeMemory(data, size, bitmap);
+            
         } else if (args[0]->IsString()) {
             bitmap = new SkBitmap();
             SkImageDecoder::DecodeFile(*v8::String::Utf8Value(args[0]), bitmap);
