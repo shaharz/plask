@@ -1720,6 +1720,8 @@ class SkCanvasWrapper {
       { "rotate", &SkCanvasWrapper::rotate },
       { "skew", &SkCanvasWrapper::skew },
       { "save", &SkCanvasWrapper::save },
+      { "saveMatrix", &SkCanvasWrapper::saveMatrix },
+      { "saveLayer", &SkCanvasWrapper::saveLayer },
       { "restore", &SkCanvasWrapper::restore },
       { "writeImage", &SkCanvasWrapper::writeImage },
     };
@@ -2287,7 +2289,39 @@ class SkCanvasWrapper {
     canvas->save();
     return v8::Undefined();
   }
+    
+    static v8::Handle<v8::Value> saveMatrix(const v8::Arguments& args) {
+        SkCanvas* canvas = ExtractPointer(args.Holder());
+        canvas->save(SkCanvas::kMatrix_SaveFlag);   // much cheaper
+        return v8::Undefined();
+    }
 
+    static v8::Handle<v8::Value> saveLayer(const v8::Arguments& args) {
+        SkCanvas* canvas = ExtractPointer(args.Holder());
+        
+        if (args.Length() == 0) {
+            canvas->saveLayer(nullptr, nullptr);
+            return v8::Undefined();
+        }
+        
+        SkPaint* paint = nullptr;
+        if (SkPaintWrapper::HasInstance(args[0])) {
+            paint = SkPaintWrapper::ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
+        }
+    
+        if (args.Length() == 5) {
+            SkRect bounds = { SkDoubleToScalar(args[1]->NumberValue()),
+                SkDoubleToScalar(args[2]->NumberValue()),
+                SkDoubleToScalar(args[3]->NumberValue()),
+                SkDoubleToScalar(args[4]->NumberValue()) };
+        
+            canvas->saveLayer(&bounds, paint);
+        } else canvas->saveLayer(nullptr, paint);
+        
+        return v8::Undefined();
+    }
+
+    
   static v8::Handle<v8::Value> restore(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
     canvas->restore();
