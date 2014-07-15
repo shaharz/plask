@@ -56,6 +56,7 @@
 #include "gpu/GrContext.h"
 #include "gpu/skgpudevice.h"
 #include "core/SkSurface.h"
+#include "SkCustomShader.h"
 
 #import <Syphon/Syphon.h>
 
@@ -1137,7 +1138,8 @@ class SkPaintWrapper {
       { "measureTextBounds", &SkPaintWrapper::measureTextBounds },
       { "getFontMetrics", &SkPaintWrapper::getFontMetrics },
       { "getTextPath", &SkPaintWrapper::getTextPath },
-      { "setBitmapShader", &SkPaintWrapper::setBitmapShader }
+      { "setBitmapShader", &SkPaintWrapper::setBitmapShader },
+      { "setCustomShader", &SkPaintWrapper::setCustomShader },
     };
 
     for (size_t i = 0; i < arraysize(constants); ++i) {
@@ -1518,6 +1520,21 @@ class SkPaintWrapper {
 
     return v8::Undefined();
   }
+    
+    static v8::Handle<v8::Value> setCustomShader(const v8::Arguments& args) {
+        if (args.Length() != 3)
+            return v8_utils::ThrowError("Wrong number of arguments.");
+        
+        SkPaint* paint = ExtractPointer(args.Holder());
+        
+        SkShader* s = SkCustomShader::Create(SkSize::Make(SkDoubleToScalar(args[0]->NumberValue()),
+                                                          SkDoubleToScalar(args[1]->NumberValue())),
+                                             SkDoubleToScalar(args[2]->NumberValue()));
+        paint->setShader(s)->unref();
+        
+        return v8::Undefined();
+    }
+
     
     static v8::Handle<v8::Value> setBitmapShader(const v8::Arguments& args) {
         if (args.Length() != 1)
