@@ -1536,8 +1536,7 @@ class SkPaintWrapper {
 //        localM.postScale(dstSize.fWidth / srcRectPtr->width(),
 //                         dstSize.fHeight / srcRectPtr->height());
         SkShader* s = SkShader::CreateBitmapShader(*bitmap, SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localM);
-        paint->setShader(s);
-        SkSafeUnref(s);
+        paint->setShader(s)->unref();
         
         return v8::Undefined();
     }
