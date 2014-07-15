@@ -299,7 +299,7 @@ class NSWindowWrapper {
       v8::Local<v8::Object> context_wrapper =
           NSOpenGLContextWrapper::GetTemplate()->
               InstanceTemplate()->NewInstance();
-      context_wrapper->SetInternalField(0, v8_utils::WrapCPointer(context));
+      context_wrapper->SetPointerInInternalField(0, context);
       args.This()->Set(v8::String::New("context"), context_wrapper);
     }
 
@@ -314,9 +314,9 @@ class NSWindowWrapper {
     // [window setDelegate:[[WindowDelegate alloc] init]];
     [window makeKeyAndOrderFront:nil];
 
-    args.This()->SetInternalField(0, v8_utils::WrapCPointer(window));
-    args.This()->SetInternalField(1, v8_utils::WrapCPointer(bitmap));
-    args.This()->SetInternalField(2, v8_utils::WrapCPointer(context));
+    args.This()->SetPointerInInternalField(0, window);
+    args.This()->SetPointerInInternalField(1, bitmap);
+    args.This()->SetPointerInInternalField(2, context);
 
     return args.This();
   }
@@ -573,7 +573,7 @@ class NSEventWrapper {
     if (!args.IsConstructCall())
       return v8_utils::ThrowTypeError(kMsgNonConstructCall);
 
-    args.This()->SetInternalField(0, v8_utils::WrapCPointer(NULL));
+    args.This()->SetPointerInInternalField(0, NULL);
 
     v8::Persistent<v8::Object> persistent =
         v8::Persistent<v8::Object>::New(args.This());
@@ -900,7 +900,7 @@ class SkPathWrapper {
     }
 
     SkPath* path = prev_path ? new SkPath(*prev_path) : new SkPath;
-    args.This()->SetInternalField(0, v8_utils::WrapCPointer(path));
+    args.This()->SetPointerInInternalField(0, path);
     return args.This();
   }
 };
@@ -1006,7 +1006,7 @@ private:
             SkImageDecoder::DecodeFile(*v8::String::Utf8Value(args[0]), bitmap);
         }
         
-        args.This()->SetInternalField(0, v8_utils::WrapCPointer(bitmap));
+        args.This()->SetPointerInInternalField(0, bitmap);
 
         v8::V8::AdjustAmountOfExternalAllocatedMemory(bitmap->getSize());
         v8::Persistent<v8::Object> persistent =
@@ -1175,8 +1175,7 @@ class SkPaintWrapper {
         value.ClearWeak();
         value.Dispose();
         
-        // Delete the backing SkCanvas object.  Skia reference counting should
-        // handle cleaning up deeper resources (for example the backing pixels).
+        // Delete the backing SkPaint object.
         delete paint;
     }
     
@@ -1687,7 +1686,7 @@ class SkPaintWrapper {
       paint->setStrokeWidth(1);
     }
     
-    args.This()->SetInternalField(0, v8_utils::WrapCPointer(paint));
+    args.This()->SetPointerInInternalField(0, paint);
       
     v8::Persistent<v8::Object> persistent =
     v8::Persistent<v8::Object>::New(args.This());
@@ -2398,7 +2397,7 @@ private:
             
             SkImage* image = SkImage::NewTexture(*bitmap);
             
-            args.This()->SetInternalField(0, v8_utils::WrapCPointer(image));
+            args.This()->SetPointerInInternalField(0, image);
         }
         
         // leave default constructor accessible so imageSnapshot() can get an empty instance (there's probably a better way)
@@ -2417,7 +2416,7 @@ v8::Handle<v8::Value> SkCanvasWrapper::imageSnapshot(const v8::Arguments& args) 
     SkSurface* surface = reinterpret_cast<SkSurface*>(obj->GetPointerFromInternalField(1));
 
     v8::Local<v8::Object> res = SkImageWrapper::GetTemplate()->InstanceTemplate()->NewInstance();
-    res->SetInternalField(0, v8_utils::WrapCPointer(surface->newImageSnapshot()));
+    res->SetPointerInInternalField(0, surface->newImageSnapshot());
     
     return res;
 }
@@ -2708,7 +2707,7 @@ class NSAppleScriptWrapper {
     [event retain];  // Released by NSEventWrapper.
     v8::Local<v8::Object> res =
         NSEventWrapper::GetTemplate()->InstanceTemplate()->NewInstance();
-    res->SetInternalField(0, v8_utils::WrapCPointer(event));
+    res->SetPointerInInternalField(0, event);
     v8::Local<v8::Value> argv[] = { v8::Number::New(0), res };
     v8::TryCatch try_catch;
     event_callback_->Call(v8::Context::GetCurrent()->Global(), 2, argv);
