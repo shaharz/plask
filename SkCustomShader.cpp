@@ -270,3 +270,60 @@ void SkCustomShader::toString(SkString* str) const {
     str->append(")");
 }
 #endif
+
+
+class ColorShaderContext : public SkShader::Context {
+public:
+    ColorShaderContext(const SkCustomShader& shader, const SkCustomShader::ContextRec&);
+    
+    virtual uint32_t getFlags() const SK_OVERRIDE;
+    virtual uint8_t getSpan16Alpha() const SK_OVERRIDE;
+    virtual void shadeSpan(int x, int y, SkPMColor span[], int count) SK_OVERRIDE;
+    virtual void shadeSpan16(int x, int y, uint16_t span[], int count) SK_OVERRIDE;
+    virtual void shadeSpanAlpha(int x, int y, uint8_t alpha[], int count) SK_OVERRIDE;
+    
+private:
+    SkPMColor   fPMColor;
+    uint32_t    fFlags;
+    uint16_t    fColor16;
+    
+    typedef SkShader::Context INHERITED;
+};
+
+
+size_t SkCustomShader::contextSize() const {
+    return sizeof(ColorShaderContext);
+}
+
+uint32_t ColorShaderContext::getFlags() const {
+    return fFlags;
+}
+
+uint8_t ColorShaderContext::getSpan16Alpha() const {
+    return SkGetPackedA32(fPMColor);
+}
+
+SkShader::Context* SkCustomShader::onCreateContext(const ContextRec& rec, void* storage) const {
+    return SkNEW_PLACEMENT_ARGS(storage, ColorShaderContext, (*this, rec));
+}
+
+ColorShaderContext::ColorShaderContext(const SkCustomShader& shader,
+                                                      const SkCustomShader::ContextRec& rec)
+: INHERITED(shader, rec)
+{
+    fPMColor = SkColorSetRGB(255, 0, 0);
+}
+
+#include "core/SkUtils.h"
+
+void ColorShaderContext::shadeSpan(int x, int y, SkPMColor span[], int count) {
+    sk_memset32(span, fPMColor, count);
+}
+
+void ColorShaderContext::shadeSpan16(int x, int y, uint16_t span[], int count) {
+    sk_memset16(span, fColor16, count);
+}
+
+void ColorShaderContext::shadeSpanAlpha(int x, int y, uint8_t alpha[], int count) {
+    memset(alpha, SkGetPackedA32(fPMColor), count);
+}
