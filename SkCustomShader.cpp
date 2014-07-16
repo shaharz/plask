@@ -188,11 +188,12 @@ void GrGLCustom::emitCode(GrGLShaderBuilder* builder,
     builder->fsCodeAppendf("\n\t\tnewp.y+=0.13/float(i)*cos(float(i)*Pi*p.x+%s*-0.4)-0.1;", timeUni);
     builder->fsCodeAppendf("\n\t\tp=newp;");
     builder->fsCodeAppendf("\n\t\t}");
-    builder->fsCodeAppendf("\n\t\tvec3 col=vec3(sin(p.x+p.y)*.55+.5,sin(p.x+p.y+6.)*.5+.5,sin(p.x+p.y+12.)*.5+.5);");
+    builder->fsCodeAppendf("\n\t\tvec3 col=vec3(cos(p.x-p.y)*.55+.5,sin(p.x-p.y+6.)*.5+.5,sin(p.x+p.y+12.)*.5+.5);");
+    builder->fsCodeAppendf("\n\t\tfloat luma = dot(vec3(0.2126, 0.7152, 0.0722), col);");
 
 //    builder->fsCodeAppendf("\n\t\t%s = vec4(%s.x, %s.y, 0.0, 1.0);", outputColor, coords[0].c_str(), coords[0].c_str());
     
-    builder->fsCodeAppendf("\n\t\t%s = vec4(col.rgb * %s.aaa, %s.a);\n", outputColor, inputColor, inputColor);
+    builder->fsCodeAppendf("\n\t\t%s = vec4(mix(%s.rgb, vec3(0), luma) * %s.aaa, %s.a);\n", outputColor, inputColor, inputColor, inputColor);
     // Pre-multiply the result
 //    builder->fsCodeAppendf("\n\t\t%s = vec4(%s.rgb * %s.aaa, %s.a);\n",
 //                           outputColor, inputColor, inputColor, inputColor);
