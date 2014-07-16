@@ -1818,6 +1818,7 @@ class SkCanvasWrapper {
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
         desc.fRenderTargetHandle = buffer;
         
+        ctx->setResourceCacheLimits(4096, 4096 * 1024 * 1024 - 1);   // 4 gigs of memory
         surface = SkSurface::NewRenderTargetDirect(ctx->wrapBackendRenderTarget(desc));
         
     } else if (args.Length() == 3) {
