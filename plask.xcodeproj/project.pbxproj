@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		256AC3DA0F4B6AC300CF3369 /* plaskAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 256AC3D90F4B6AC300CF3369 /* plaskAppDelegate.mm */; };
 		5365DBC21948D24E00E91E90 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 5365DBC01948D24E00E91E90 /* nanovg.c */; };
+		53859AED1974D38000CC2944 /* SkCustomShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53859AEB1974D38000CC2944 /* SkCustomShader.cpp */; };
 		538FF74F19529DF6004DFD85 /* libskia_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 538FF6DF19528F60004DFD85 /* libskia_core.a */; };
 		538FF75019529DF6004DFD85 /* libskia_effects.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 538FF7301952969D004DFD85 /* libskia_effects.a */; };
 		538FF75119529DF6004DFD85 /* libskia_images.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 538FF7271952968E004DFD85 /* libskia_images.a */; };
@@ -80,6 +81,8 @@
 		53230FFD196E084400B8B7C4 /* nvg_bindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nvg_bindings.h; sourceTree = "<group>"; };
 		53230FFE196F21CB00B8B7C4 /* svgparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = svgparser.h; sourceTree = "<group>"; };
 		5365DBC01948D24E00E91E90 /* nanovg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = nanovg.c; path = ../../libs/nanovg/src/nanovg.c; sourceTree = "<group>"; };
+		53859AEB1974D38000CC2944 /* SkCustomShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SkCustomShader.cpp; sourceTree = "<group>"; };
+		53859AEC1974D38000CC2944 /* SkCustomShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SkCustomShader.h; sourceTree = "<group>"; };
 		538FF6DF19528F60004DFD85 /* libskia_core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_core.a; path = deps/skia/xcodebuild/Release/libskia_core.a; sourceTree = "<group>"; };
 		538FF6E019528F60004DFD85 /* libskia_opts.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_opts.a; path = deps/skia/xcodebuild/Release/libskia_opts.a; sourceTree = "<group>"; };
 		538FF6E119528F60004DFD85 /* libskia_skgpu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_skgpu.a; path = deps/skia/xcodebuild/Release/libskia_skgpu.a; sourceTree = "<group>"; };
@@ -243,6 +246,8 @@
 				53230FFD196E084400B8B7C4 /* nvg_bindings.h */,
 				53230FFC196E078E00B8B7C4 /* midi_bindings.h */,
 				53230FF9196E049C00B8B7C4 /* gl_bindings.h */,
+				53859AEB1974D38000CC2944 /* SkCustomShader.cpp */,
+				53859AEC1974D38000CC2944 /* SkCustomShader.h */,
 				53230FFE196F21CB00B8B7C4 /* svgparser.h */,
 				256AC3F00F4B6AF500CF3369 /* plask_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.mm */,
@@ -391,6 +396,7 @@
 				8D11072D0486CEB800E47090 /* main.mm in Sources */,
 				538FF7C11952A615004DFD85 /* SkUtils_opts_SSE2.cpp in Sources */,
 				538FF7C21952A615004DFD85 /* SkXfermode_opts_SSE2.cpp in Sources */,
+				53859AED1974D38000CC2944 /* SkCustomShader.cpp in Sources */,
 				538FF7831952A104004DFD85 /* opts_check_x86.cpp in Sources */,
 				256AC3DA0F4B6AC300CF3369 /* plaskAppDelegate.mm in Sources */,
 				538FF7BD1952A615004DFD85 /* SkBlitRect_opts_SSE2.cpp in Sources */,
@@ -480,6 +486,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = Plask;
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/deps/skia/src/gpu $(PROJECT_DIR)/deps/skia/src/gpu/gl $(PROJECT_DIR)/deps/skia/include/gpu $(PROJECT_DIR)/deps/skia/src/core";
 			};
 			name = Debug;
 		};
@@ -540,6 +547,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = Plask;
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/deps/skia/src/gpu $(PROJECT_DIR)/deps/skia/src/gpu/gl $(PROJECT_DIR)/deps/skia/include/gpu $(PROJECT_DIR)/deps/skia/src/core";
 			};
 			name = Release;
 		};
