@@ -5,7 +5,7 @@
 
 class SK_API SkCustomShader : public SkShader {
 public:
-    static SkShader* Create(SkSize dims, SkScalar seed);
+    static SkShader* Create(SkSize dims, SkScalar seed, const SkMatrix* localMatrix = NULL);
     
     
     virtual bool asNewEffect(GrContext* context, const SkPaint&, const SkMatrix*, GrColor*,
@@ -19,7 +19,7 @@ protected:
     virtual void flatten(SkWriteBuffer&) const SK_OVERRIDE;
    
 private:
-    SkCustomShader(SkSize dims, SkScalar seed);
+    SkCustomShader(SkSize dims, SkScalar seed, const SkMatrix* localMatrix = NULL);
     virtual ~SkCustomShader();
     
     /*const*/ SkScalar                  fSeed;

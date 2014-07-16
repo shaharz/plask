@@ -22,12 +22,12 @@
 #endif
 
 
-SkShader* SkCustomShader::Create(SkSize dims, SkScalar seed) {
-    return SkNEW_ARGS(SkCustomShader, (dims, seed));
+SkShader* SkCustomShader::Create(SkSize dims, SkScalar seed, const SkMatrix* localMatrix) {
+    return SkNEW_ARGS(SkCustomShader, (dims, seed, localMatrix));
 }
 
-SkCustomShader::SkCustomShader(SkSize dims, SkScalar seed)
-: fDims(dims), fSeed(seed)
+SkCustomShader::SkCustomShader(SkSize dims, SkScalar seed, const SkMatrix* localMatrix)
+: fDims(dims), fSeed(seed), INHERITED(localMatrix)
 {
 }
 

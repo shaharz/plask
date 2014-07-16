@@ -1521,14 +1521,19 @@ class SkPaintWrapper {
   }
     
     static v8::Handle<v8::Value> setCustomShader(const v8::Arguments& args) {
-        if (args.Length() != 3)
+        if (args.Length() != 4)
             return v8_utils::ThrowError("Wrong number of arguments.");
         
         SkPaint* paint = ExtractPointer(args.Holder());
         
+        SkMatrix localM;
+        localM.reset();
+        localM.setRotate(SkDoubleToScalar(args[3]->NumberValue()));
+        
         SkShader* s = SkCustomShader::Create(SkSize::Make(SkDoubleToScalar(args[0]->NumberValue()),
                                                           SkDoubleToScalar(args[1]->NumberValue())),
-                                             SkDoubleToScalar(args[2]->NumberValue()));
+                                             SkDoubleToScalar(args[2]->NumberValue()),
+                                             &localM);
         paint->setShader(s)->unref();
         
         return v8::Undefined();
