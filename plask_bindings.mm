@@ -1709,6 +1709,7 @@ class SkCanvasWrapper {
       { "clipCircle", &SkCanvasWrapper::clipCircle },
       { "clipPath", &SkCanvasWrapper::clipPath },
       { "drawCircle", &SkCanvasWrapper::drawCircle },
+      { "drawArc", &SkCanvasWrapper::drawArc },
       { "drawLine", &SkCanvasWrapper::drawLine },
       { "drawPaint", &SkCanvasWrapper::drawPaint },
       { "drawCanvas", &SkCanvasWrapper::drawCanvas },
@@ -1919,6 +1920,23 @@ class SkCanvasWrapper {
                        *paint);
     return v8::Undefined();
   }
+    
+    static v8::Handle<v8::Value> drawArc(const v8::Arguments& args) {
+        if (!SkPaintWrapper::HasInstance(args[0]))
+            return v8::Undefined();
+        
+        SkPaint* paint = SkPaintWrapper::ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
+        SkCanvas* canvas = ExtractPointer(args.Holder());
+        
+        SkScalar x = SkDoubleToScalar(args[1]->NumberValue());
+        SkScalar y = SkDoubleToScalar(args[2]->NumberValue());
+        SkScalar r = SkDoubleToScalar(args[5]->NumberValue());
+        SkRect rect = SkRect::MakeLTRB(x-r, y-r, x+r, y+r);
+        canvas->drawArc(rect,
+                        SkDoubleToScalar(args[3]->NumberValue()),
+                        SkDoubleToScalar(args[4]->NumberValue()), true, *paint);
+        return v8::Undefined();
+    }
 
   static v8::Handle<v8::Value> drawLine(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
