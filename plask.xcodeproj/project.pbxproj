@@ -80,9 +80,9 @@
 		53230FFC196E078E00B8B7C4 /* midi_bindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = midi_bindings.h; sourceTree = "<group>"; };
 		53230FFD196E084400B8B7C4 /* nvg_bindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nvg_bindings.h; sourceTree = "<group>"; };
 		53230FFE196F21CB00B8B7C4 /* svgparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = svgparser.h; sourceTree = "<group>"; };
-		5365DBC01948D24E00E91E90 /* nanovg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = nanovg.c; path = ../../libs/nanovg/src/nanovg.c; sourceTree = "<group>"; };
 		53859AEB1974D38000CC2944 /* SkCustomShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SkCustomShader.cpp; sourceTree = "<group>"; };
 		53859AEC1974D38000CC2944 /* SkCustomShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SkCustomShader.h; sourceTree = "<group>"; };
+		5365DBC01948D24E00E91E90 /* nanovg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = nanovg.c; path = deps/nanovg/src/nanovg.c; sourceTree = "<group>"; };
 		538FF6DF19528F60004DFD85 /* libskia_core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_core.a; path = deps/skia/xcodebuild/Release/libskia_core.a; sourceTree = "<group>"; };
 		538FF6E019528F60004DFD85 /* libskia_opts.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_opts.a; path = deps/skia/xcodebuild/Release/libskia_opts.a; sourceTree = "<group>"; };
 		538FF6E119528F60004DFD85 /* libskia_skgpu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libskia_skgpu.a; path = deps/skia/xcodebuild/Release/libskia_skgpu.a; sourceTree = "<group>"; };
@@ -436,7 +436,7 @@
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/deps\"",
+					"$(PROJECT_DIR)/deps",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -479,7 +479,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/deps\"",
-					"\"$(SRCROOT)/deps/skia/src/xcodebuild/Release\"",
 					"$(PROJECT_DIR)/deps/skia/xcodebuild/Release",
 					"$(PROJECT_DIR)/deps",
 				);
@@ -500,7 +499,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/deps\"",
+					"$(PROJECT_DIR)/deps",
 				);
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -540,7 +539,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/deps\"",
-					"\"$(SRCROOT)/deps/skia/src/xcodebuild/Release\"",
 					"$(PROJECT_DIR)/deps/skia/xcodebuild/Release",
 					"$(PROJECT_DIR)/deps",
 				);
