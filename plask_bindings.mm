@@ -65,6 +65,7 @@
 #include "nvg_bindings.h"
 
 #include "svgparser.h"
+#include "SkDebugCanvas.h"
 
 template <typename T>
 T Clamp(T v, T a, T b) {
@@ -1755,6 +1756,7 @@ class SkCanvasWrapper {
       { "restore", &SkCanvasWrapper::restore },
       { "writeImage", &SkCanvasWrapper::writeImage },
       { "imageSnapshot", &SkCanvasWrapper::imageSnapshot },
+      { "hitTest", &SkCanvasWrapper::hitTest },
     };
 
     for (size_t i = 0; i < arraysize(constants); ++i) {
@@ -1775,8 +1777,27 @@ class SkCanvasWrapper {
   }
 
   static SkCanvas* ExtractPointer(v8::Handle<v8::Object> obj) {
-    return reinterpret_cast<SkCanvas*>(obj->GetPointerFromInternalField(0));
+    return reinterpret_cast<SkSurface*>(obj->GetPointerFromInternalField(0))->getCanvas();
   }
+
+    struct HitTest {
+        HitTest(int _x, int _y, int _w, int _h, v8::Persistent<v8::Function> _callback)
+        : x(_x), y(_y),
+          callback(_callback),
+          canvas(new SkDebugCanvas(_w, _h)) {}
+        ~HitTest() {
+            callback.Dispose();
+            delete canvas;
+        }
+        int x, y;
+        SkDebugCanvas* canvas;
+        v8::Persistent<v8::Function> callback;
+    };
+
+    
+    static HitTest* ExtractDebugCanvasPointer(v8::Handle<v8::Object> obj) {
+        return reinterpret_cast<HitTest*>(obj->GetPointerFromInternalField(1));
+    }
 
   static bool HasInstance(v8::Handle<v8::Value> value) {
     return GetTemplate()->HasInstance(value);
@@ -1785,7 +1806,9 @@ class SkCanvasWrapper {
  private:
   static void WeakCallback(v8::Persistent<v8::Value> value, void* data) {
     v8::Handle<v8::Object> obj = v8::Handle<v8::Object>::Cast(value);
-    SkSurface* surface = reinterpret_cast<SkSurface*>(obj->GetPointerFromInternalField(1));
+    SkSurface* surface = reinterpret_cast<SkSurface*>(obj->GetPointerFromInternalField(0));
+    SkDebugCanvas* debugCanvas = reinterpret_cast<SkDebugCanvas*>(obj->GetPointerFromInternalField(1));
+    if (debugCanvas) delete debugCanvas;
 
     int size_bytes = surface->width() *
                      surface->height() * 4;
@@ -1820,6 +1843,7 @@ class SkCanvasWrapper {
         
         ctx->setResourceCacheLimits(4096, 4096 * 1024 * 1024 - 1);   // 4 gigs of memory
         surface = SkSurface::NewRenderTargetDirect(ctx->wrapBackendRenderTarget(desc));
+        args.This()->SetPointerInInternalField(1, nullptr);
         
     } else if (args.Length() == 3) {
         auto parentCanvas = ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
@@ -1832,10 +1856,7 @@ class SkCanvasWrapper {
       return v8_utils::ThrowError("Improper SkCanvas constructor arguments.");
     }
 
-    // TODO: get rid of canvas redudancy, store surface only (since the canvas is cached on the surface anyway)
-    SkCanvas* canvas = surface->getCanvas();
-    args.This()->SetPointerInInternalField(0, canvas);
-    args.This()->SetPointerInInternalField(1, surface);
+    args.This()->SetPointerInInternalField(0, surface);
 
     // Notify the GC that we have a possibly large amount of data allocated
     // behind this object.  This is sometimes a bit of a lie, for example for
@@ -1849,6 +1870,11 @@ class SkCanvasWrapper {
 
     return args.This();
   }
+#define EXECUTE(cmd) cmd; \
+{ \
+SkCanvasWrapper::HitTest* ht = SkCanvasWrapper::ExtractDebugCanvasPointer(args.Holder()); \
+if (ht) ht->cmd; \
+};
 
   static v8::Handle<v8::Value> concatMatrix(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
@@ -1863,6 +1889,8 @@ class SkCanvasWrapper {
                   SkDoubleToScalar(args[7]->NumberValue()),
                   SkDoubleToScalar(args[8]->NumberValue()));
       canvas->concat(matrix);
+
+      EXECUTE(canvas->concat(matrix));
     return v8::Undefined();
   }
 
@@ -1878,15 +1906,29 @@ class SkCanvasWrapper {
                   SkDoubleToScalar(args[6]->NumberValue()),
                   SkDoubleToScalar(args[7]->NumberValue()),
                   SkDoubleToScalar(args[8]->NumberValue()));
-    canvas->setMatrix(matrix);
+    EXECUTE(canvas->setMatrix(matrix));
     return v8::Undefined();
   }
 
   static v8::Handle<v8::Value> resetMatrix(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
-    canvas->resetMatrix();
+    EXECUTE(canvas->resetMatrix());
     return v8::Undefined();
   }
+
+    static v8::Handle<v8::Value> hitTest(const v8::Arguments& args) {
+        SkCanvas* canvas = ExtractPointer(args.Holder());
+        SkCanvasWrapper::HitTest* hit = ExtractDebugCanvasPointer(args.Holder());
+        if (hit == nullptr) {
+            auto callback = v8::Handle<v8::Function>::Cast(args[2]);
+            args.Holder()->SetPointerInInternalField(1, new HitTest(args[0]->Uint32Value(),
+                                                                    args[1]->Uint32Value(),
+                                                                    canvas->getDevice()->width(),
+                                                                    canvas->getDevice()->height(),
+                                                                    v8::Persistent<v8::Function>::New(callback)));
+        }
+        return v8::Undefined();
+    }
 
   static v8::Handle<v8::Value> clipRect(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
@@ -1895,7 +1937,7 @@ class SkCanvasWrapper {
                     SkDoubleToScalar(args[1]->NumberValue()),
                     SkDoubleToScalar(args[2]->NumberValue()),
                     SkDoubleToScalar(args[3]->NumberValue()) };
-    canvas->clipRect(rect, SkRegion::kIntersect_Op, true);
+    EXECUTE(canvas->clipRect(rect, SkRegion::kIntersect_Op, true));
     return v8::Undefined();
   }
 
@@ -1908,7 +1950,7 @@ class SkCanvasWrapper {
 
         SkRRect rrect;
         rrect.setOval(SkRect::MakeLTRB(x-r, y-r, x+r, y+r));
-        canvas->clipRRect(rrect, SkRegion::kIntersect_Op, true);
+        EXECUTE(canvas->clipRRect(rrect, SkRegion::kIntersect_Op, true));
         return v8::Undefined();
     }
     
@@ -1921,7 +1963,7 @@ class SkCanvasWrapper {
     SkPath* path = SkPathWrapper::ExtractPointer(
         v8::Handle<v8::Object>::Cast(args[0]));
 
-    canvas->clipPath(*path);  // TODO(deanm): Handle the optional argument.
+    EXECUTE(canvas->clipPath(*path));  // TODO(deanm): Handle the optional argument.
     return v8::Undefined();
   }
 
@@ -1934,10 +1976,10 @@ class SkCanvasWrapper {
     SkPaint* paint = SkPaintWrapper::ExtractPointer(
         v8::Handle<v8::Object>::Cast(args[0]));
 
-    canvas->drawCircle(SkDoubleToScalar(args[1]->NumberValue()),
+    EXECUTE(canvas->drawCircle(SkDoubleToScalar(args[1]->NumberValue()),
                        SkDoubleToScalar(args[2]->NumberValue()),
                        SkDoubleToScalar(args[3]->NumberValue()),
-                       *paint);
+                       *paint));
     return v8::Undefined();
   }
 
@@ -1950,11 +1992,11 @@ class SkCanvasWrapper {
     SkPaint* paint = SkPaintWrapper::ExtractPointer(
         v8::Handle<v8::Object>::Cast(args[0]));
 
-    canvas->drawLine(SkDoubleToScalar(args[1]->NumberValue()),
+    EXECUTE(canvas->drawLine(SkDoubleToScalar(args[1]->NumberValue()),
                      SkDoubleToScalar(args[2]->NumberValue()),
                      SkDoubleToScalar(args[3]->NumberValue()),
                      SkDoubleToScalar(args[4]->NumberValue()),
-                     *paint);
+                     *paint));
     return v8::Undefined();
   }
 
@@ -1967,7 +2009,7 @@ class SkCanvasWrapper {
     SkPaint* paint = SkPaintWrapper::ExtractPointer(
         v8::Handle<v8::Object>::Cast(args[0]));
 
-    canvas->drawPaint(*paint);
+    EXECUTE(canvas->drawPaint(*paint));
     return v8::Undefined();
   }
 
@@ -2028,7 +2070,7 @@ class SkCanvasWrapper {
             SkDoubleToScalar(args[4]->NumberValue()),
             SkDoubleToScalar(args[5]->NumberValue()) };
 
-        canvas->drawBitmapRect(*bitmap, nullptr, dst_rect, paint);
+        EXECUTE(canvas->drawBitmapRect(*bitmap, nullptr, dst_rect, paint));
         return v8::Undefined();
     }
 
@@ -2041,7 +2083,7 @@ class SkCanvasWrapper {
     int a = Clamp(v8_utils::ToInt32WithDefault(args[3], 255), 0, 255);
     int m = v8_utils::ToInt32WithDefault(args[4], SkXfermode::kSrcOver_Mode);
 
-    canvas->drawARGB(a, r, g, b, static_cast<SkXfermode::Mode>(m));
+    EXECUTE(canvas->drawARGB(a, r, g, b, static_cast<SkXfermode::Mode>(m)));
     return v8::Undefined();
   }
 
@@ -2054,6 +2096,11 @@ class SkCanvasWrapper {
     int a = Clamp(v8_utils::ToInt32WithDefault(args[3], 255), 0, 255);
 
     canvas->clear(SkColorSetARGB(a, r, g, b));
+      auto hitTest = SkCanvasWrapper::ExtractDebugCanvasPointer(args.Holder());
+      if (hitTest && canvas->getClipStack()->isWideOpen()) {
+          // if the clip is empty, clear all draw commands
+          hitTest->canvas->getDrawCommands().deleteAll();
+      }
     return v8::Undefined();
   }
 
@@ -2072,7 +2119,7 @@ class SkCanvasWrapper {
     SkPath* path = SkPathWrapper::ExtractPointer(
         v8::Handle<v8::Object>::Cast(args[1]));
 
-    canvas->drawPath(*path, *paint);
+    EXECUTE(canvas->drawPath(*path, *paint));
     return v8::Undefined();
   }
 
@@ -2100,9 +2147,9 @@ class SkCanvasWrapper {
       points[i].set(SkDoubleToScalar(x), SkDoubleToScalar(y));
     }
 
-    canvas->drawPoints(
+    EXECUTE(canvas->drawPoints(
         static_cast<SkCanvas::PointMode>(v8_utils::ToInt32(args[1])),
-        points_len, points, *paint);
+        points_len, points, *paint));
 
     delete[] points;
 
@@ -2122,7 +2169,7 @@ class SkCanvasWrapper {
                     SkDoubleToScalar(args[2]->NumberValue()),
                     SkDoubleToScalar(args[3]->NumberValue()),
                     SkDoubleToScalar(args[4]->NumberValue()) };
-    canvas->drawRect(rect, *paint);
+    EXECUTE(canvas->drawRect(rect, *paint));
     return v8::Undefined();
   }
 
@@ -2139,10 +2186,10 @@ class SkCanvasWrapper {
                     SkDoubleToScalar(args[2]->NumberValue()),
                     SkDoubleToScalar(args[3]->NumberValue()),
                     SkDoubleToScalar(args[4]->NumberValue()) };
-    canvas->drawRoundRect(rect,
+    EXECUTE(canvas->drawRoundRect(rect,
                           SkDoubleToScalar(args[5]->NumberValue()),
                           SkDoubleToScalar(args[6]->NumberValue()),
-                          *paint);
+                          *paint));
     return v8::Undefined();
   }
 
@@ -2156,10 +2203,10 @@ class SkCanvasWrapper {
         v8::Handle<v8::Object>::Cast(args[0]));
 
     v8::String::Utf8Value utf8(args[1]);
-    canvas->drawText(*utf8, utf8.length(),
+    EXECUTE(canvas->drawText(*utf8, utf8.length(),
                      SkDoubleToScalar(args[2]->NumberValue()),
                      SkDoubleToScalar(args[3]->NumberValue()),
-                     *paint);
+                     *paint));
     return v8::Undefined();
   }
 
@@ -2179,49 +2226,49 @@ class SkCanvasWrapper {
         v8::Handle<v8::Object>::Cast(args[1]));
 
     v8::String::Utf8Value utf8(args[2]);
-    canvas->drawTextOnPathHV(*utf8, utf8.length(), *path,
+    EXECUTE(canvas->drawTextOnPathHV(*utf8, utf8.length(), *path,
                              SkDoubleToScalar(args[3]->NumberValue()),
                              SkDoubleToScalar(args[4]->NumberValue()),
-                             *paint);
+                             *paint));
     return v8::Undefined();
   }
 
   static v8::Handle<v8::Value> translate(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
-    canvas->translate(SkDoubleToScalar(args[0]->NumberValue()),
-                      SkDoubleToScalar(args[1]->NumberValue()));
+    EXECUTE(canvas->translate(SkDoubleToScalar(args[0]->NumberValue()),
+                      SkDoubleToScalar(args[1]->NumberValue())));
     return v8::Undefined();
   }
 
   static v8::Handle<v8::Value> scale(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
-    canvas->scale(SkDoubleToScalar(args[0]->NumberValue()),
-                  SkDoubleToScalar(args[1]->NumberValue()));
+    EXECUTE(canvas->scale(SkDoubleToScalar(args[0]->NumberValue()),
+                  SkDoubleToScalar(args[1]->NumberValue())));
     return v8::Undefined();
   }
 
   static v8::Handle<v8::Value> rotate(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
-    canvas->rotate(SkDoubleToScalar(args[0]->NumberValue()));
+    EXECUTE(canvas->rotate(SkDoubleToScalar(args[0]->NumberValue())));
     return v8::Undefined();
   }
 
   static v8::Handle<v8::Value> skew(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
-    canvas->skew(SkDoubleToScalar(args[0]->NumberValue()),
-                 SkDoubleToScalar(args[1]->NumberValue()));
+    EXECUTE(canvas->skew(SkDoubleToScalar(args[0]->NumberValue()),
+                 SkDoubleToScalar(args[1]->NumberValue())));
     return v8::Undefined();
   }
 
   static v8::Handle<v8::Value> save(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
-    canvas->save();
+    EXECUTE(canvas->save());
     return v8::Undefined();
   }
     
     static v8::Handle<v8::Value> saveMatrix(const v8::Arguments& args) {
         SkCanvas* canvas = ExtractPointer(args.Holder());
-        canvas->save(SkCanvas::kMatrix_SaveFlag);   // much cheaper
+        EXECUTE(canvas->save(SkCanvas::kMatrix_SaveFlag));   // much cheaper
         return v8::Undefined();
     }
 
@@ -2244,8 +2291,8 @@ class SkCanvasWrapper {
                 SkDoubleToScalar(args[3]->NumberValue()),
                 SkDoubleToScalar(args[4]->NumberValue()) };
         
-            canvas->saveLayer(&bounds, paint);
-        } else canvas->saveLayer(nullptr, paint);
+            EXECUTE(canvas->saveLayer(&bounds, paint));
+        } else EXECUTE(canvas->saveLayer(nullptr, paint));
         
         return v8::Undefined();
     }
@@ -2253,7 +2300,7 @@ class SkCanvasWrapper {
     
   static v8::Handle<v8::Value> restore(const v8::Arguments& args) {
     SkCanvas* canvas = ExtractPointer(args.Holder());
-    canvas->restore();
+    EXECUTE(canvas->restore());
     return v8::Undefined();
   }
 
@@ -2389,6 +2436,14 @@ private:
                     SkDoubleToScalar(args[1]->NumberValue()),
                     SkDoubleToScalar(args[2]->NumberValue()),
                     paint);
+        
+        SkCanvasWrapper::HitTest* ht = SkCanvasWrapper::ExtractDebugCanvasPointer(args.Holder());
+        if (ht) {
+            image->draw(ht->canvas,
+                        SkDoubleToScalar(args[1]->NumberValue()),
+                        SkDoubleToScalar(args[2]->NumberValue()),
+                        paint);
+        }
         return v8::Undefined();
     }
     
@@ -2453,8 +2508,28 @@ v8::Handle<v8::Value> NSOpenGLContextWrapper::texImage2DSkCanvasB(
 v8::Handle<v8::Value> NSOpenGLContextWrapper::drawSkCanvas(
     const v8::Arguments& args) {
     
-    SkCanvas* canvas = SkCanvasWrapper::ExtractPointer(v8::Handle<v8::Object>::Cast(args[0]));
+    auto obj = v8::Handle<v8::Object>::Cast(args[0]);
+    SkCanvas* canvas = SkCanvasWrapper::ExtractPointer(obj);
     canvas->getGrContext()->flush();
+    
+    // TODO: uv_queue_work, possibly integrate directly with TUIO?
+    SkCanvasWrapper::HitTest* hit = SkCanvasWrapper::ExtractDebugCanvasPointer(obj);
+    if (hit && !hit->canvas->getDrawCommands().isEmpty()) {
+        auto dc = hit->canvas;
+        int cmd = dc->getCommandAtPoint(hit->x, hit->y, dc->getDrawCommands().count());
+        auto type = dc->getDrawCommandAt(cmd)->getType();
+        if (type != DrawType::DRAW_CLEAR
+            && type != DrawType::SAVE
+            && type != DrawType::RESTORE) {
+            auto info = dc->getDrawCommandAt(cmd);
+            v8::Local<v8::Value> argv[] = { v8::String::New(info->toCString()) };
+            hit->callback->Call(v8::Context::GetCurrent()->Global(), 1, argv);
+        }
+        
+        // cleanup
+        obj->SetPointerInInternalField(1, nullptr);
+        delete hit;
+    }
     
   return v8::Undefined();
 }
